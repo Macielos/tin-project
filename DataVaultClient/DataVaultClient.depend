@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1416761156 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/Client.cpp
+	"Client.h"
+
+1416759295 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/Client.h
+	"ClientStore.h"
+	<boost/array.hpp>
+	<boost/asio.hpp>
+	<boost/lexical_cast.hpp>
+
+1416752239 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientStore.h
+
+1416759484 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientInterface.cpp
+	"ClientInterface.h"
+
+1416759469 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientInterface.h
+	"Client.h"
+
+1416696206 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientStore.cpp
+	"ClientStore.h"
+
+1416761336 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/main.cpp
+	<iostream>
+	<boost/array.hpp>
+	<boost/asio.hpp>
+	"ClientInterface.h"
+

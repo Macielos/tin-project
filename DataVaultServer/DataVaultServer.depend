@@ -1,0 +1,17 @@
+# depslib dependency file v1.0
+1416756053 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultServer/src/Server.cpp
+	"Server.h"
+
+1416756059 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultServer/src/Server.h
+	"ServerStore.h"
+	<boost/array.hpp>
+	<boost/asio.hpp>
+
+1416517716 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultServer/src/ServerStore.h
+
+1416752209 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultServer/src/ServerStore.cpp
+	"ServerStore.h"
+
+1416755137 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultServer/src/main.cpp
+	"Server.h"
+
