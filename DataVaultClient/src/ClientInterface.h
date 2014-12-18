@@ -7,6 +7,6 @@ class ClientInterface
     public:
         ClientInterface();
         ~ClientInterface();
-        void connect(string host, int port);
-        string send(string message);
+        void init(string host, short messagePort, short dataPort);
+        string send(Message& message);
 };

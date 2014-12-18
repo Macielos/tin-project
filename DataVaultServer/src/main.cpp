@@ -1,17 +1,19 @@
 #include "Server.h"
 
-/*std::string make_daytime_string()
-{
-  using namespace std; // For time_t, time and ctime;
-  time_t now = time(0);
-  return ctime(&now);
-}*/
+#include <boost/lexical_cast.hpp>
 
-const int port = 21000;
-
-int main()
+int main(int argc, char* argv[])
 {
-    Server server(port);
+
+     if (argc != 3){
+        std::cerr << "Arguments: <messagePort> <dataPort>" << std::endl;
+        return 1;
+    }
+
+    const short messagePort = boost::lexical_cast<short>(argv[1]);
+    const short dataPort = boost::lexical_cast<short>(argv[2]);
+
+    Server server(messagePort, dataPort);
     server.listen();
 
     return 0;

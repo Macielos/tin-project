@@ -8,19 +8,26 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    std::cout<<argc<<std::endl;
-    if (argc != 3){
-        std::cerr << "Arguments: <host> <port>" << std::endl;
+    if (argc != 4){
+        std::cerr << "Arguments: <host> <messagePort> <dataPort>" << std::endl;
         return 1;
     }
 
     const string host = argv[1];
-    const int port = atoi(argv[2]);
+    const short messagePort = atoi(argv[2]);
+    const short dataPort = atoi(argv[3]);
 
     ClientInterface clientInterface;
-    clientInterface.connect(host, port);
+    clientInterface.init(host, messagePort, dataPort);
 
-    string response = clientInterface.send("Hello");
+    string userId = "xyz";
+    Action action = LIST;
+    vector<string> parameters;
+    parameters.push_back("filename1");
+
+    Message message(userId, action, parameters);
+
+    string response = clientInterface.send(message);
     cout<<"response: "<<response<<endl;
 
     return 0;
