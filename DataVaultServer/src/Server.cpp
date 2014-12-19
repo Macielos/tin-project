@@ -29,7 +29,13 @@ void Server::listen()
             Message message(temp);
             deserialize(message, messageBuffer.data());
 
-            cout<<"Reading "<<messageBuffer.data()<<endl;
+
+            cout<<"Message: "<<message.getUserId()<<", "<<message.getAction()<<endl;
+            vector<string>& parameters = message.getParameters();
+            vector<string>::iterator it;
+           for(it=parameters.begin(); it!=parameters.end(); ++it ){
+                cout<< *it <<'\n';
+           }
 
             string response = "RESPONSE";
 

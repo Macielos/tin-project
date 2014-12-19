@@ -26,10 +26,3 @@ Action Message::getAction(){
 vector<string>& Message::getParameters(){
     return parameters;
 }
-
-template <typename Archive> void Message::serialize(Archive& ar, const unsigned int version)
-{
-    ar & userId;
-    ar & action;
-    ar & parameters;
-}
