@@ -10,10 +10,10 @@ ClientInterface::~ClientInterface()
     //dtor
 }
 
-void ClientInterface::connect(string host, int port){
-    client.connect(host, port);
+void ClientInterface::init(string host, short messagePort, short dataPort){
+    client.init(host, messagePort, dataPort);
 }
 
-string ClientInterface::send(string message){
+string ClientInterface::send(Message& message){
     return client.send(message);
 }

@@ -13,9 +13,12 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
+					<Add directory="../DataVaultAPI/" />
+					<Add directory="DataVaultAPI/src/" />
 				</Compiler>
 				<Linker>
-					<Add option="-lboost_system -lboost_filesystem -lpthread" />
+					<Add option="-lboost_system -lboost_filesystem -lpthread -lboost_serialization" />
+					<Add directory="../DataVaultAPI/" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -25,16 +28,21 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
+					<Add directory="../DataVaultAPI/" />
+					<Add directory="DataVaultAPI/src/" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
-					<Add option="-lboost_system -lboost_filesystem -lpthread" />
+					<Add option="-lboost_system -lboost_filesystem -lpthread -lboost_serialization" />
+					<Add directory="../DataVaultAPI/" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="../DataVaultAPI/src/Message.cpp" />
+		<Unit filename="../DataVaultAPI/src/Message.h" />
 		<Unit filename="src/Server.cpp" />
 		<Unit filename="src/Server.h" />
 		<Unit filename="src/ServerStore.cpp" />
@@ -43,6 +51,7 @@
 		<Extensions>
 			<code_completion />
 			<debugger />
+			<envvars />
 		</Extensions>
 	</Project>
 </CodeBlocks_project_file>

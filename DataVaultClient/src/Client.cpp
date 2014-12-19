@@ -8,34 +8,48 @@ Client::Client()
 Client::~Client()
 {
     delete socket;
+    delete ioService;
 }
 
-void Client::connect(string host, int port){
-    cout<<"connecting"<<endl;
-    boost::asio::io_service io_service;
+void Client::init(string host, short messagePort, short dataPort){
+    this->host = host;
+    this->messagePort = messagePort;
+    this->dataPort = dataPort;
 
-    tcp::resolver resolver(io_service);
-    tcp::resolver::query query(host, boost::lexical_cast<std::string>(port));
+    cout<<"connecting"<<endl;
+    ioService = new boost::asio::io_service();
+
+    tcp::resolver resolver(*ioService);
+    tcp::resolver::query query(host, boost::lexical_cast<std::string>(messagePort));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
-    socket = new tcp::socket(io_service);
+    socket = new tcp::socket(*ioService);
 
     boost::asio::connect(*socket, endpoint_iterator);
 }
 
-string Client::send(string message){
-    boost::array<char, 128> buf;
+string Client::send(Message& message){
+    boost::array<char, 128> messageBuffer;
     boost::system::error_code error;
 
     try{
-        size_t len = this->socket->read_some(boost::asio::buffer(buf), error);
-        cout<<len<<endl;
-        cout<<error<<endl;
+        cout<<"Writing message of "<<message.getUserId()<<endl;
+        string serializedMessage = serialize(message);
+        write(*socket, boost::asio::buffer(serializedMessage), error);
+        socket->read_some(boost::asio::buffer(messageBuffer), error);
+        cout<<"Reading "<<messageBuffer.data()<<endl;
         if (error){
             throw boost::system::system_error(error);
         }
     }catch (std::exception& e){
         std::cerr << e.what() << std::endl;
     }
-    return string(buf.data());
+    return string(messageBuffer.data());
+}
+
+template<typename T> string Client::serialize(T& t){
+    std::ostringstream archive_stream;
+    boost::archive::text_oarchive archive(archive_stream);
+    archive << t;
+    return archive_stream.str();
 }
