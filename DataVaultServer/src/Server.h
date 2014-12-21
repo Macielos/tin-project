@@ -6,12 +6,16 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
+#include <deque>
+
 using namespace std;
 using boost::asio::ip::tcp;
 
 class Server
 {
         ServerStore serverStore;
+
+        deque<Message*> messages;
 
         short messagePort;
         short dataPort;
