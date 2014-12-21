@@ -17,3 +17,7 @@ void ClientInterface::init(string host, short messagePort, short dataPort){
 string ClientInterface::send(Message& message){
     return client.send(message);
 }
+
+void ClientInterface::sendFile(string filename){
+    client.sendFile(filename);
+}

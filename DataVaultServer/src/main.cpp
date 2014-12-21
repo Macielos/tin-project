@@ -14,6 +14,7 @@ int main(int argc, char* argv[])
     const short dataPort = boost::lexical_cast<short>(argv[2]);
 
     Server server(messagePort, dataPort);
+    server.init();
     server.listen();
 
     return 0;

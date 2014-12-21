@@ -30,6 +30,8 @@ int main(int argc, char* argv[])
     string response = clientInterface.send(message);
     cout<<"response: "<<response<<endl;
 
+    clientInterface.sendFile("TEST_FILE.txt");
+
     return 0;
 }
 
