@@ -15,3 +15,28 @@
 1416755137 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultServer/src/main.cpp
 	"Server.h"
 
+1419164618 source:/home/zabor/Projects/tin-project/DataVaultAPI/src/Message.cpp
+	"Message.h"
+
+1419164618 /home/zabor/Projects/tin-project/DataVaultAPI/src/Message.h
+	<vector>
+	<string>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1419164618 source:/home/zabor/Projects/tin-project/DataVaultServer/src/Server.cpp
+	"Server.h"
+
+1419164618 /home/zabor/Projects/tin-project/DataVaultServer/src/Server.h
+	"ServerStore.h"
+	"../DataVaultAPI/src/Message.h"
+	<boost/archive/text_iarchive.hpp>
+	<boost/array.hpp>
+	<boost/asio.hpp>
+
+1419166591 /home/zabor/Projects/tin-project/DataVaultServer/src/ServerStore.h
+	<string>
+
+1419164618 source:/home/zabor/Projects/tin-project/DataVaultServer/src/ServerStore.cpp
+	"ServerStore.h"
+
