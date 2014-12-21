@@ -29,6 +29,7 @@ void Server::listen()
             Message message(temp);
             deserialize(message, messageBuffer.data());
 
+            messages.push_back(&message);
 
             cout<<"Message: "<<message.getUserId()<<", "<<message.getAction()<<endl;
             vector<string>& parameters = message.getParameters();
@@ -36,6 +37,7 @@ void Server::listen()
            for(it=parameters.begin(); it!=parameters.end(); ++it ){
                 cout<< *it <<'\n';
            }
+           cout<<endl;
 
             string response = "RESPONSE";
 
@@ -49,7 +51,6 @@ void Server::listen()
 
 template<typename T> void Server::deserialize(T& t, string serializedData)
 {
-
     try{
         std::istringstream archive_stream(serializedData);
         boost::archive::text_iarchive archive(archive_stream);
