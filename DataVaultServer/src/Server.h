@@ -1,30 +1,24 @@
-#include "ServerStore.h"
-#include "../DataVaultAPI/src/Message.h"
+#include "MessageHandler.h"
 
 #include <boost/archive/text_iarchive.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
-#include <deque>
+#include <queue>
 
-#include <ctime>
 #include <iostream>
 #include <string>
-#include <boost/asio.hpp>
-#include <fstream>
-#include <sstream>
+
 
 using namespace std;
 using boost::asio::ip::tcp;
 
 class Server
 {
-        ServerStore serverStore;
-
+        ServerStore* serverStore;
         boost::asio::io_service* ioService;
-
-        deque<Message*> messages;
+        MessageHandler* messageHandler;
 
         short messagePort;
         short dataPort;
@@ -33,8 +27,8 @@ class Server
     public:
         Server(short messagePort, short dataPort);
         ~Server();
-        void init();
         void listen();
-        void receiveFile(string userId, string filename);
+
+    private:
         template<typename T> void deserialize(T& t, string serializedData);
 };

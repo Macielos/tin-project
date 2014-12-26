@@ -1,5 +1,7 @@
 #include <vector>
 #include <string>
+#include <sstream>
+
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 
@@ -12,7 +14,7 @@ class Message
 {
     string userId;
     Action action;
-    vector<string>& parameters;
+    vector<string> parameters;
 
     friend class boost::serialization::access;
     template <class Archive> void serialize(Archive& ar, const unsigned int version)
@@ -23,11 +25,13 @@ class Message
     }
 
     public:
-        Message(string userId, Action action, vector<string>& parameters);
-        Message(vector<string>& parameters);
+        Message(string userId, Action action, vector<string> parameters);
+        Message(Message* message);
+        Message(vector<string> parameters);
         ~Message();
         string getUserId();
         Action getAction();
         vector<string>& getParameters();
+        string toString();
 
 };

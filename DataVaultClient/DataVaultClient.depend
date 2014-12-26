@@ -1,27 +1,43 @@
 # depslib dependency file v1.0
-1416761156 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/Client.cpp
+1419460618 source:/home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Message.cpp
+	"Message.h"
+
+1419623128 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Message.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1419458951 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/ClientInterface.cpp
+	"ClientInterface.h"
+
+1419458951 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/ClientInterface.h
 	"Client.h"
 
-1416759295 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/Client.h
+1419458951 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/Client.h
 	"ClientStore.h"
+	"../DataVaultAPI/src/Message.h"
+	<boost/archive/text_oarchive.hpp>
 	<boost/array.hpp>
 	<boost/asio.hpp>
 	<boost/lexical_cast.hpp>
+	<iostream>
+	<boost/asio.hpp>
+	<fstream>
+	<sstream>
 
-1416752239 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientStore.h
+1419458666 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/ClientStore.h
 
-1416759484 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientInterface.cpp
-	"ClientInterface.h"
-
-1416759469 /home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientInterface.h
-	"Client.h"
-
-1416696206 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/ClientStore.cpp
+1419458666 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/ClientStore.cpp
 	"ClientStore.h"
 
-1416761336 source:/home/macielos/workspace/workspace_cpp/tin-project/DataVaultClient/src/main.cpp
+1419620395 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/main.cpp
 	<iostream>
 	<boost/array.hpp>
 	<boost/asio.hpp>
 	"ClientInterface.h"
+
+1419524099 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/Client.cpp
+	"Client.h"
 
