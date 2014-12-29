@@ -1,5 +1,5 @@
 /**
- *  ### DVClient - main ###
+ *  ### main.cpp ###
  *
  *      Funkcja główna aplikacji klienciej.
  *
@@ -16,23 +16,14 @@ int main(int argc, char* argv[])
 {
     ClientInterface clientInterface;
 
-    cout << "\n\t# DATA VAULT #\n\n"; // powitanie
-
     if (argc == 4) // wczytano argumenty połączenia z poleceniem
     {
         clientInterface.changeParameter(HOST, argv[1]);
         clientInterface.changeParameter(MESSAGE_PORT, argv[2]);
         clientInterface.changeParameter(DATA_PORT, argv[3]);
     }
-    else
-    {
-        return 1;
-    }
-
-    clientInterface.init();
 
     while (clientInterface.getCommand()); // główna pętla programu
-
     return 0;
 }
 

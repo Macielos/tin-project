@@ -15,33 +15,44 @@
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/exception/diagnostic_information.hpp>
 
 using namespace std;
 using boost::asio::ip::tcp;
 
 class Client
 {
-    ClientStore clientStore;
+    private:
+        ClientStore clientStore;
 
-    string host;
-    short messagePort;
-    short dataPort;
+        string host;
+        unsigned short messagePort;
+        unsigned short dataPort;
+        string userId;
+        string password;
 
-    string login;
-    string password;
+        bool validParameters;   // flaga mówiąca czy są wprowadzone poprawne parametry połączenia
+        bool connected;         // flaga mówiąca czy jest aktywne połączenie z serwerem
+        bool logged;            // flaga mówiąca czy użytkownik jest akutalnie zalogowany (czy może operować na plikach)
 
-    boost::asio::io_service* ioService;
-    tcp::socket* socket;
+        boost::asio::io_service* ioService;
+        tcp::socket* socket;
+
+        void checkParamCorrectness(); // sprawdza czy host, message/dataPort są poprawne -> czy można próbować łączyć
 
     public:
         Client();
         ~Client();
 
-        void setHost(string host);
-        void setMessagePort(short messagePort);
-        void setDataPort(short dataPort);
+        bool setHost(string host);
+        bool setMessagePort(int messagePort);
+        bool setDataPort(int dataPort);
 
-        void init();
+        bool isValidParameters();
+        bool isConnected();
+        bool isLogged();
+
+        bool connect();
         string sendMessage(Message& message);
         template<typename T> string serialize(T& t);
 };

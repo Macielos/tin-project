@@ -20,16 +20,16 @@ class ClientInterface
         vector<string> command; // polecenie (komenda) wpisana przez użytkownika podzielona na wyrazy
 
         void splitCommandToWords(string commandLine);
-        int interpretCommand(string commandLine);
+        bool interpretCommand(string commandLine);
         void followTaskOnServer(Action action);
         string sendMessage(Message& message);
         void showHelp();
+        void connect();
 
     public:
         ClientInterface();
         ~ClientInterface();
 
         void changeParameter(ConnectionParameter param, string value);
-        int getCommand();
-        void init();
+        bool getCommand();
 };

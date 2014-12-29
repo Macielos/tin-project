@@ -8,7 +8,7 @@
 
 ClientInterface::ClientInterface()
 {
-
+    cout << "\n\t# DATA VAULT #\n\n"; // powitanie
 }
 
 ClientInterface::~ClientInterface()
@@ -25,22 +25,40 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
     {
         case HOST:
         {
-            client.setHost(value);
-            cout << "Wczytano parametr: host: " << value << "\n";
+            if (client.setHost(value))
+            {
+                cout << "Wczytano parametr: host: " << value << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawna nazwa hosta!\n";
+            }
             break;
         }
         case MESSAGE_PORT:
         {
-            short messagePort = atoi(value.c_str());
-            client.setMessagePort(messagePort);
-            cout << "Wczytano parametr: port poleceń: " << messagePort << "\n";
+            int messagePort = atoi(value.c_str());
+            if (client.setMessagePort(messagePort))
+            {
+                cout << "Wczytano parametr: port poleceń: " << messagePort << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawny numer portu poleceń!\n";
+            }
             break;
         }
         case DATA_PORT:
         {
-            short dataPort = atoi(value.c_str());
-            client.setDataPort(dataPort);
-            cout << "Wczytano parametr: port danych: " << dataPort << "\n";
+            int dataPort = atoi(value.c_str());
+            if (client.setDataPort(dataPort))
+            {
+                cout << "Wczytano parametr: port danych: " << dataPort << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawny numer portu danych!\n";
+            }
             break;
         }
     }
@@ -49,7 +67,7 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
 /**
  *  Oczekuje na wpisanie komendy przez użytkownika, a następnie przekazuje ją do interpretacji.
  */
- int ClientInterface::getCommand()
+ bool ClientInterface::getCommand()
  {
     string s;
     command.clear();
@@ -61,24 +79,55 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
 /**
  *  Interpertuje komendę wpisaną przez użytkownika. Zwracana wartość 0 - koniec działania programu.
  */
-int ClientInterface::interpretCommand(string commandLine)
+bool ClientInterface::interpretCommand(string commandLine)
 {
     splitCommandToWords(commandLine);
     string c = command[0]; // pierwsze słowo - jakie działanie
+    transform(c.begin(), c.end(), c.begin(), ::tolower); // wszystkie litery małe
     command.erase(command.begin()); // usunięcie z vectora pierwszego wyrazu (bo dalej niepotrzebny)
 
     /*
         Komendy związane z pracą samego programu.
     */
     // EXIT
-    if (c == "help")
-    {
-        showHelp();
-        return true;
-    }
-    else if ( (c == "quit") || (c == "exit") )
+    if ( (c == "quit") || (c == "exit") )
     {
         return false;
+    }
+    // HELP
+    else if (c == "help")
+    {
+        showHelp();
+    }
+    // CONNECT
+    else if (c == "connect")
+    {
+        connect();
+    }
+    // SET...
+    else if (c == "set")
+    {
+        string c_t = command[0]; // c_tymczsowe
+        transform(c_t.begin(), c_t.end(), c_t.begin(), ::tolower); // wszystkie litery małe
+        // ...HOST
+        if (c_t == "host")
+        {
+            changeParameter(HOST, command[1]);
+        }
+        // ...MESSAGE_PORT
+        else if ( (c_t == "message_port") || ( c_t == "mport") || ( c_t == "messageport") )
+        {
+            changeParameter(MESSAGE_PORT, command[1]);
+        }
+        // ...DATA_PORT
+        else if ( (c_t == "data_port") || ( c_t == "dport") || ( c_t == "dataport") )
+        {
+            changeParameter(DATA_PORT, command[1]);
+        }
+        else
+        {
+            cout << "# BŁĄD: Nie rozpoznano parametru set!\n";
+        }
     }
     /*
         Komendy związane z poleceniami do serwera.
@@ -128,39 +177,34 @@ int ClientInterface::interpretCommand(string commandLine)
     {
         followTaskOnServer(RENAME);
     }
-    // GIVE_ACCESS
-    else if (c == "give_access") // bez spacji
+    // GIVE_ACCESS bez spacji
+    else if (c == "give_access")
     {
         followTaskOnServer(GIVE_ACCESS);
     }
-    else if (c == "give") // ze spacją
-    {
-        if (command[0] == "access")
-        {
-            command.erase(command.begin()); // usunięcie z vectora pierwszego wyrazu (bo dalej niepotrzebny)
-            followTaskOnServer(GIVE_ACCESS);
-        }
-        else
-        {
-            cout << "Nie rozpoznano polecenia.";
-        }
-    }
-    // REVOKE_ACCESS
-    else if (c == "revoke_access") // bez spacji
+    // REVOKE_ACCESS bez spacji
+    else if (c == "revoke_access")
     {
         followTaskOnServer(REVOKE_ACCESS);
     }
-    else if (c == "revoke") // ze spacją
+    // GIVE_ACCESS lub REVOKE ACCESS ze spacją
+    else if ( (c == "give") || (c == "revoke") )
     {
-        if (command[0] == "access")
+        string c_t = command[0]; // c_tymczsowe
+        transform(c_t.begin(), c_t.end(), c_t.begin(), ::tolower); // wszystkie litery małe
+        if (c_t == "access") // jeżeli drugie słowo ok
         {
             command.erase(command.begin()); // usunięcie z vectora pierwszego wyrazu (bo dalej niepotrzebny)
-            followTaskOnServer(REVOKE_ACCESS);
+            followTaskOnServer((c == "give") ? GIVE_ACCESS : REVOKE_ACCESS);
         }
         else
         {
-            cout << "Nie rozpoznano polecenia.";
+            cout << "# BŁĄD: Nie rozpoznano polecenia!\n";
         }
+    }
+    else
+    {
+        cout << "# BŁĄD: Nie rozpoznano polecenia!\n";
     }
 
     return true;
@@ -203,19 +247,37 @@ void ClientInterface::splitCommandToWords(string commandLine)
  */
 void ClientInterface::followTaskOnServer(Action action)
 {
-    string login = "xyz";
-    Message message(login, action, command);
+    if (client.isConnected())
+    {
+        string userId = "user123";
+        Message message(userId, action, command);
 
-    string response = sendMessage(message);
-    cout << "Odpowiedź: " << response << endl;
+        string response = sendMessage(message);
+        cout << "Odpowiedź: " << response << endl;
+    }
+    else
+    {
+        cout << "# BŁĄD: Brak połączenia z serwerem! Użyj polecenia: connect\n";
+    }
 }
 
 /**
  *  Inicjalizuje połączenie klienta z serwerem.
  */
-void ClientInterface::init()
+void ClientInterface::connect()
 {
-    client.init();
+    if (client.isValidParameters())
+    {
+        cout << "\nNawiązywanie połączenia..." << endl;
+        if (client.connect())
+        {
+            cout << "Połączono z serwerem.\n";
+        }
+    }
+    else
+    {
+        cout << "# BŁĄD: Brak danych połączenia! Użyj polecenia: set [parametr] [wartość]\n";
+    }
 }
 
 /**
