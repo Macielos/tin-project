@@ -1,3 +1,12 @@
+/**
+ *  ### Client.h ###
+ *
+ *      Nagłówek klasy Client.
+ *
+ *  Klasa Client odpowiada za zestawienie połączenia po stronie klienta. Przechowuje
+ *  wszystkie potrzebne do tego informacje takie jak adres hosta czy też numery portów.
+ *
+ */
 #include "ClientStore.h"
 #include "../DataVaultAPI/src/Message.h"
 
@@ -18,13 +27,21 @@ class Client
     short messagePort;
     short dataPort;
 
+    string login;
+    string password;
+
     boost::asio::io_service* ioService;
     tcp::socket* socket;
 
     public:
         Client();
         ~Client();
-        void init(string host, short messagePort, short dataPort);
-        string send(Message& message);
+
+        void setHost(string host);
+        void setMessagePort(short messagePort);
+        void setDataPort(short dataPort);
+
+        void init();
+        string sendMessage(Message& message);
         template<typename T> string serialize(T& t);
 };

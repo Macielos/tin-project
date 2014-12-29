@@ -1,3 +1,9 @@
+/**
+ *  ### DVClient - main ###
+ *
+ *      Funkcja główna aplikacji klienciej.
+ *
+ */
 #include <iostream>
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
@@ -8,27 +14,24 @@ using namespace std;
 
 int main(int argc, char* argv[])
 {
-    if (argc != 4){
-        std::cerr << "Arguments: <host> <messagePort> <dataPort>" << std::endl;
+    ClientInterface clientInterface;
+
+    cout << "\n\t# DATA VAULT #\n\n"; // powitanie
+
+    if (argc == 4) // wczytano argumenty połączenia z poleceniem
+    {
+        clientInterface.changeParameter(HOST, argv[1]);
+        clientInterface.changeParameter(MESSAGE_PORT, argv[2]);
+        clientInterface.changeParameter(DATA_PORT, argv[3]);
+    }
+    else
+    {
         return 1;
     }
 
-    const string host = argv[1];
-    const short messagePort = atoi(argv[2]);
-    const short dataPort = atoi(argv[3]);
+    clientInterface.init();
 
-    ClientInterface clientInterface;
-    clientInterface.init(host, messagePort, dataPort);
-
-    string userId = "xyz";
-    Action action = LIST;
-    vector<string> parameters;
-    parameters.push_back("filename1");
-
-    Message message(userId, action, parameters);
-
-    string response = clientInterface.send(message);
-    cout<<"response: "<<response<<endl;
+    while (clientInterface.getCommand()); // główna pętla programu
 
     return 0;
 }
@@ -74,4 +77,3 @@ int main(int argc, char* argv[])
     std::cerr << e.what() << std::endl;
   }
 */
-// test

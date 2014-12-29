@@ -1,4 +1,10 @@
-#include "Client.h"
+/**
+ *  ### Client.cpp ###
+ *
+ *      Ciało klasy Client.
+ *
+ */
+ #include "Client.h"
 
 Client::Client()
 {
@@ -11,12 +17,24 @@ Client::~Client()
     delete ioService;
 }
 
-void Client::init(string host, short messagePort, short dataPort){
+void Client::setHost(string host)
+{
     this->host = host;
-    this->messagePort = messagePort;
-    this->dataPort = dataPort;
+}
 
-    cout<<"connecting"<<endl;
+void Client::setMessagePort(short messagePort)
+{
+    this->messagePort = messagePort;
+}
+
+void Client::setDataPort(short dataPort)
+{
+    this->dataPort = dataPort;
+}
+
+void Client::init()
+{
+    cout << "Nawiązywanie połączenia..." << endl;
     ioService = new boost::asio::io_service();
 
     tcp::resolver resolver(*ioService);
@@ -28,26 +46,32 @@ void Client::init(string host, short messagePort, short dataPort){
     boost::asio::connect(*socket, endpoint_iterator);
 }
 
-string Client::send(Message& message){
+string Client::sendMessage(Message& message)
+{
     boost::array<char, 128> messageBuffer;
     boost::system::error_code error;
 
-    try{
-        cout<<"Writing message of "<<message.getUserId()<<endl;
+    try
+    {
+        cout << "Wysyłanie polecenia od: " << message.getUserId() << endl;
         string serializedMessage = serialize(message);
         write(*socket, boost::asio::buffer(serializedMessage), error);
         socket->read_some(boost::asio::buffer(messageBuffer), error);
-        cout<<"Reading "<<messageBuffer.data()<<endl;
-        if (error){
+        cout << "Serwer: " << messageBuffer.data() << endl;
+        if (error)
+        {
             throw boost::system::system_error(error);
         }
-    }catch (std::exception& e){
+    }
+    catch (std::exception& e)
+    {
         std::cerr << e.what() << std::endl;
     }
     return string(messageBuffer.data());
 }
 
-template<typename T> string Client::serialize(T& t){
+template<typename T> string Client::serialize(T& t)
+{
     std::ostringstream archive_stream;
     boost::archive::text_oarchive archive(archive_stream);
     archive << t;
