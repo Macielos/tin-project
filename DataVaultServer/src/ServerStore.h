@@ -1,16 +1,16 @@
 #include <string>
 
+using namespace std;
+
 class ServerStore
 {
     public:
         ServerStore();
         ~ServerStore();
-        /*
-        Moze jakas klasa tu
-        String list(String username);
-        int save(String username, String filename);
-        int load(String username, String filename);
-        int remove(String username, String filename);
-        int rename(String username, String oldname, String newname);
-        */
+
+        string list(string username);
+        int save(string username, string filename);
+        int remove(string username, string filename);
+        int rename(string username, string oldname, string newname);
+
 };
