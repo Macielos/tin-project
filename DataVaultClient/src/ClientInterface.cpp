@@ -7,7 +7,7 @@ ClientInterface::ClientInterface()
 
 ClientInterface::~ClientInterface()
 {
-    //dtor
+
 }
 
 void ClientInterface::init(string host, short messagePort, short dataPort){
@@ -16,4 +16,12 @@ void ClientInterface::init(string host, short messagePort, short dataPort){
 
 string ClientInterface::send(Message& message){
     return client.send(message);
+}
+
+void ClientInterface::sendFile(string filename){
+    client.sendFile(filename);
+}
+
+void ClientInterface::receiveFile(string filename){
+    client.receiveFile(filename);
 }

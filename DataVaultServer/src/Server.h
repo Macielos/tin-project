@@ -1,21 +1,31 @@
+#include "FileTransferManager.h"
 #include "ServerStore.h"
-#include "../DataVaultAPI/src/Message.h"
 
 #include <boost/archive/text_iarchive.hpp>
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
 
-#include <deque>
+#include <boost/thread.hpp>
+#include <boost/bind.hpp>
+
+#include <queue>
+
+#include <iostream>
+#include <sstream>
+#include <string>
+
 
 using namespace std;
 using boost::asio::ip::tcp;
 
 class Server
 {
-        ServerStore serverStore;
+        ServerStore* serverStore;
+        boost::asio::io_service* ioService;
+        FileTransferManager* fileTransferManager;
 
-        deque<Message*> messages;
+        boost::mutex dataPortAccessMutex;
 
         short messagePort;
         short dataPort;
@@ -25,5 +35,8 @@ class Server
         Server(short messagePort, short dataPort);
         ~Server();
         void listen();
+
+    private:
+        void handleMessage(tcp::socket* socket);
         template<typename T> void deserialize(T& t, string serializedData);
 };

@@ -26,6 +26,8 @@ void Client::init(string host, short messagePort, short dataPort){
     socket = new tcp::socket(*ioService);
 
     boost::asio::connect(*socket, endpoint_iterator);
+
+    fileTransferManager = new FileTransferManager(*ioService, dataPort);
 }
 
 string Client::send(Message& message){
@@ -45,6 +47,14 @@ string Client::send(Message& message){
         std::cerr << e.what() << std::endl;
     }
     return string(messageBuffer.data());
+}
+
+void Client::sendFile(string filename){
+    fileTransferManager->sendFile(filename);
+}
+
+void Client::receiveFile(string filename){
+    fileTransferManager->receiveFile(filename);
 }
 
 template<typename T> string Client::serialize(T& t){
