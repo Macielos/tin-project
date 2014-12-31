@@ -13,10 +13,12 @@ FileTransferManager::~FileTransferManager()
 
 void FileTransferManager::sendFile(string destination, string filename){
     try{
+
         boost::system::error_code error = boost::asio::error::host_not_found;
+        //boost::array<char, 128> messageBuffer;
 
         tcp::resolver resolver(ioService);
-        tcp::resolver::query dataQuery(destination, boost::lexical_cast<string>(dataPort));
+        tcp::resolver::query dataQuery(destination, boost::lexical_cast<string>(dataPort+1));
         tcp::resolver::iterator dataEndpointIterator = resolver.resolve(dataQuery);
 
         boost::asio::ip::tcp::socket dataSocket(ioService);
@@ -30,6 +32,7 @@ void FileTransferManager::sendFile(string destination, string filename){
         }
         if (error)
             return __LINE__;*/
+
         boost::array<char, 1024> buf;
         std::ifstream sourceFile(filename.c_str(), std::ios_base::binary | std::ios_base::ate);
         if (!sourceFile){
@@ -62,6 +65,7 @@ void FileTransferManager::sendFile(string destination, string filename){
             }
         }
         std::cout << "Sending file " << filename << " completed successfully.\n";
+        dataSocket.close();
     }
     catch (std::exception& e)
     {
@@ -69,7 +73,7 @@ void FileTransferManager::sendFile(string destination, string filename){
     }
 }
 
-void FileTransferManager::receiveFile(string destination, string filename)
+void FileTransferManager::receiveFile(string source, string filename)
 {
     boost::array<char, 1024> buf;
     size_t file_size = 0;
@@ -83,19 +87,17 @@ void FileTransferManager::receiveFile(string destination, string filename)
         boost::asio::read_until(socket, request_buf, "\n\n");
         std::cout<< "request size:" << request_buf.size() << "\n";
         std::istream request_stream(&request_buf);
-        std::string file_path;
-        request_stream >> file_path;
         request_stream >> file_size;
         request_stream.read(buf.c_array(), 2); // eat the "\n\n"
 
-        std::cout << file_path << " size is " << file_size << std::endl;
+        std::cout << filename << " size is " << file_size << std::endl;
         //size_t pos = file_path.find_last_of(`\\`);
         //if (pos!=std::string::npos)
         //    file_path = file_path.substr(pos+1);
-        std::ofstream output_file(file_path.c_str(), std::ios_base::binary);
+        std::ofstream output_file(filename.c_str(), std::ios_base::binary);
         if (!output_file)
         {
-            std::cout << "failed to open " << file_path << std::endl;
+            std::cout << "failed to open " << filename << std::endl;
             return;
         }
 
@@ -112,8 +114,12 @@ void FileTransferManager::receiveFile(string destination, string filename)
             size_t len = socket.read_some(boost::asio::buffer(buf), error);
             if (len>0)
                 output_file.write(buf.c_array(), (std::streamsize)len);
-            if (output_file.tellp()== (std::fstream::pos_type)(std::streamsize)file_size)
+            if (output_file.tellp()== (std::fstream::pos_type)(std::streamsize)file_size){
+                size_t len2 = socket.write_some(boost::asio::buffer("OK"), error);
+                cout<<"response sent: "<<len2<<endl;
+                socket.close();
                 break; // file was received
+            }
             if (error)
             {
                 std::cout << error << std::endl;
@@ -121,7 +127,6 @@ void FileTransferManager::receiveFile(string destination, string filename)
             }
         }
         std::cout << "received " << output_file.tellp() << " bytes."<<endl;
-
     }
     catch (std::exception& e)
     {

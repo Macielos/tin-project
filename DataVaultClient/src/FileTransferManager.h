@@ -21,7 +21,7 @@ class FileTransferManager
     public:
         FileTransferManager(boost::asio::io_service& ioService, short dataPort);
         ~FileTransferManager();
-        void waitForNotification();
         void sendFile(string filename);
         void receiveFile(string filename);
+        void confirm();
 };

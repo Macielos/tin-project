@@ -5,7 +5,6 @@ Server::Server(short messagePort, short dataPort):
 {
     serverStore = new ServerStore();
     ioService = new boost::asio::io_service();
-    //ioService->run();
     fileTransferManager = new FileTransferManager(*ioService, dataPort);
     cout<<"Server created"<<endl;
 }
@@ -34,9 +33,9 @@ void Server::listen()
 }
 
 void Server::handleMessage(tcp::socket* socket){
-    boost::array<char, 128> messageBuffer;
+    boost::array<char, 2048> messageBuffer;
     boost::system::error_code error;
-    //ioService->run();
+    ioService->run();
     socket->read_some(boost::asio::buffer(messageBuffer), error);
     if (error){
         cerr<<"error reading message"<<endl;
@@ -64,6 +63,8 @@ void Server::handleMessage(tcp::socket* socket){
         case DOWNLOAD:
             dataPortAccessMutex.lock();
             socket->write_some(boost::asio::buffer("OK"), error);
+            boost::this_thread::sleep(boost::posix_time::seconds(1));
+            //waitForConfirmation();
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"User "<<message.getUserId()<<" is downloading file "<<message.getParameters()[i]<<endl;
                 fileTransferManager->sendFile(message.getSource(), message.getParameters()[i]);
@@ -79,45 +80,17 @@ void Server::handleMessage(tcp::socket* socket){
             cout<<"error"<<endl;
             socket->write_some(boost::asio::buffer("ERROR"), error);
     }
+    socket->close();
     delete socket;
 }
 
-/*
-void Server::handleEnqueuedMessages(){
-    while(true){
-        queueAccessMutex.lock();
-        while(messageQueue.size()==0){
-            cout<<"Thread is waiting"<<endl;
-            queueAccessMutex.unlock();
-            queueEmpty.wait(queueEmptyMutex);
-            queueAccessMutex.lock();
-            cout<<"Thread is awakening"<<endl;
-        }
-        Message* message = messageQueue.front();
-
-        messageQueue.pop();
-        queueAccessMutex.unlock();
-
-        switch(message->getAction()){
-            case UPLOAD:
-                for(unsigned int i=0; i<message->getParameters().size(); ++i){
-                    cout<<"User "<<message->getUserId()<<" is uploading file "<<message->getParameters()[i]<<endl;
-                    fileTransferManager->receiveFile("localhost", message->getParameters()[i]);
-                    cout<<"Upload finished"<<endl;
-                }
-                break;
-            case DOWNLOAD:
-                for(unsigned int i=0; i<message->getParameters().size(); ++i){
-                    cout<<"User "<<message->getUserId()<<" is downloading file "<<message->getParameters()[i]<<endl;
-                    fileTransferManager->sendFile("localhost", message->getParameters()[i]);
-                    cout<<"Download finished"<<endl;
-                }
-                break;
-            default:
-                cerr<<"Error: wrong message type in the queue"<<endl;
-        }
-    }
-}*/
+void Server::waitForConfirmation(){
+    cout<<"Waiting for confirmation..."<<endl;
+    tcp::acceptor acceptor(*ioService, tcp::endpoint(tcp::v4(), dataPort+1));
+    tcp::socket socket(*ioService);
+    acceptor.accept(socket);
+    socket.close();
+}
 
 template<typename T> void Server::deserialize(T& t, string serializedData)
 {

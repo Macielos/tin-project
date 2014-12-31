@@ -38,5 +38,6 @@ class Server
 
     private:
         void handleMessage(tcp::socket* socket);
+        void waitForConfirmation();
         template<typename T> void deserialize(T& t, string serializedData);
 };

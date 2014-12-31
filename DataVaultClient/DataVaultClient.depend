@@ -38,16 +38,18 @@
 
 1419899117 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Constants.h
 
-1419902347 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/Client.cpp
+1419984161 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/Client.cpp
 	"Client.h"
 
-1419902372 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/Client.h
+1419981241 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/Client.h
 	"ClientStore.h"
 	"FileTransferManager.h"
 	"../DataVaultAPI/src/Message.h"
 	<boost/archive/text_oarchive.hpp>
 	<boost/array.hpp>
 	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/bind.hpp>
 	<boost/lexical_cast.hpp>
 
 1419458666 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/ClientStore.h
@@ -61,7 +63,7 @@
 1419458666 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/ClientStore.cpp
 	"ClientStore.h"
 
-1419899117 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/FileTransferManager.h
+1419984243 /home/maciek/workspace/cpp/tin-project/DataVaultClient/src/FileTransferManager.h
 	<boost/asio.hpp>
 	<boost/lexical_cast.hpp>
 	<ctime>
@@ -71,12 +73,12 @@
 	<sstream>
 	"../DataVaultAPI/src/Message.h"
 
-1419902034 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/main.cpp
+1419983059 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/main.cpp
 	<iostream>
 	<boost/array.hpp>
 	<boost/asio.hpp>
 	"ClientInterface.h"
 
-1419899117 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/FileTransferManager.cpp
+1419979769 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/FileTransferManager.cpp
 	"FileTransferManager.h"
 

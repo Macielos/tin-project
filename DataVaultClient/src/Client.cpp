@@ -31,7 +31,7 @@ void Client::init(string host, short messagePort, short dataPort){
 }
 
 string Client::send(Message& message){
-    boost::array<char, 128> messageBuffer;
+    boost::array<char, 2048> messageBuffer;
     boost::system::error_code error;
 
     try{

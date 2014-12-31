@@ -22,5 +22,5 @@ class FileTransferManager
         FileTransferManager(boost::asio::io_service& ioService, short dataPort);
         ~FileTransferManager();
         void sendFile(string destination, string filename);
-        void receiveFile(string destination, string filename);
+        void receiveFile(string source, string filename);
 };

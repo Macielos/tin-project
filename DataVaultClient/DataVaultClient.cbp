@@ -11,7 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="localhost" />
+				<Option parameters="localhost 21000 21001" />
 				<Compiler>
 					<Add option="-g" />
 					<Add directory="../DataVaultAPI" />
@@ -26,7 +26,7 @@
 				<Option object_output="obj/Release/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="localhost" />
+				<Option parameters="localhost 21000 21001" />
 				<Compiler>
 					<Add option="-O2" />
 					<Add directory="../DataVaultAPI" />
@@ -49,6 +49,8 @@
 		<Unit filename="src/ClientInterface.h" />
 		<Unit filename="src/ClientStore.cpp" />
 		<Unit filename="src/ClientStore.h" />
+		<Unit filename="src/FileTransferManager.cpp" />
+		<Unit filename="src/FileTransferManager.h" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />
