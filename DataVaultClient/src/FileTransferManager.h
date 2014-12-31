@@ -1,5 +1,6 @@
 #include <boost/asio.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/thread.hpp>
 
 #include <ctime>
 #include <iostream>
@@ -22,6 +23,7 @@ class FileTransferManager
         FileTransferManager(boost::asio::io_service& ioService, short dataPort);
         ~FileTransferManager();
         void sendFile(string filename);
-        void receiveFile(string filename);
-        void confirm();
+        void receiveFile(string filename, bool confirm);
+        void sendConfirmation();
+        void waitForConfirmation();
 };

@@ -22,6 +22,6 @@ void ClientInterface::sendFile(string filename){
     client.sendFile(filename);
 }
 
-void ClientInterface::receiveFile(string filename){
-    client.receiveFile(filename);
+void ClientInterface::receiveFile(string filename, bool confirm){
+    client.receiveFile(filename, confirm);
 }

@@ -51,10 +51,11 @@ string Client::send(Message& message){
 
 void Client::sendFile(string filename){
     fileTransferManager->sendFile(filename);
+    fileTransferManager->waitForConfirmation();
 }
 
-void Client::receiveFile(string filename){
-    fileTransferManager->receiveFile(filename);
+void Client::receiveFile(string filename, bool confirm){
+    fileTransferManager->receiveFile(filename, confirm);
 }
 
 template<typename T> string Client::serialize(T& t){

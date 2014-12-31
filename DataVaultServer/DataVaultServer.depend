@@ -51,11 +51,12 @@
 	<boost/serialization/vector.hpp>
 	"Constants.h"
 
-1419979626 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileTransferManager.cpp
+1420041715 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileTransferManager.cpp
 	"FileTransferManager.h"
 
-1419944645 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileTransferManager.h
+1420042066 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileTransferManager.h
 	<boost/asio.hpp>
+	<boost/thread.hpp>
 	<boost/lexical_cast.hpp>
 	<ctime>
 	<iostream>
@@ -68,7 +69,7 @@
 	"Server.h"
 	<boost/lexical_cast.hpp>
 
-1419983546 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/Server.h
+1420023843 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/Server.h
 	"FileTransferManager.h"
 	"ServerStore.h"
 	<boost/archive/text_iarchive.hpp>
@@ -76,7 +77,6 @@
 	<boost/asio.hpp>
 	<boost/thread.hpp>
 	<boost/bind.hpp>
-	<queue>
 	<iostream>
 	<sstream>
 	<string>
@@ -84,7 +84,7 @@
 1419458666 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/ServerStore.h
 	<string>
 
-1419984646 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/Server.cpp
+1420042015 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/Server.cpp
 	"Server.h"
 
 1419458666 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/ServerStore.cpp

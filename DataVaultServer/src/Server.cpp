@@ -49,13 +49,15 @@ void Server::handleMessage(tcp::socket* socket){
     cout<<"Message: "<<endl;
     cout<<message.toString()<<endl;
 
+   // char a;
+
     switch(message.getAction()){
         case UPLOAD:
             dataPortAccessMutex.lock();
             socket->write_some(boost::asio::buffer("OK"), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"User "<<message.getUserId()<<" is uploading file "<<message.getParameters()[i]<<endl;
-                fileTransferManager->receiveFile(message.getSource(), message.getParameters()[i]);
+                fileTransferManager->receiveFile(message.getSource(), message.getParameters()[i], i!=0);
                 cout<<"Done."<<endl;
             }
             dataPortAccessMutex.unlock();
@@ -63,11 +65,11 @@ void Server::handleMessage(tcp::socket* socket){
         case DOWNLOAD:
             dataPortAccessMutex.lock();
             socket->write_some(boost::asio::buffer("OK"), error);
-            boost::this_thread::sleep(boost::posix_time::seconds(1));
-            //waitForConfirmation();
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"User "<<message.getUserId()<<" is downloading file "<<message.getParameters()[i]<<endl;
+                fileTransferManager->waitForConfirmation();
                 fileTransferManager->sendFile(message.getSource(), message.getParameters()[i]);
+                //cin>>a;
                 cout<<"Done."<<endl;
             }
             dataPortAccessMutex.unlock();
@@ -82,14 +84,6 @@ void Server::handleMessage(tcp::socket* socket){
     }
     socket->close();
     delete socket;
-}
-
-void Server::waitForConfirmation(){
-    cout<<"Waiting for confirmation..."<<endl;
-    tcp::acceptor acceptor(*ioService, tcp::endpoint(tcp::v4(), dataPort+1));
-    tcp::socket socket(*ioService);
-    acceptor.accept(socket);
-    socket.close();
 }
 
 template<typename T> void Server::deserialize(T& t, string serializedData)

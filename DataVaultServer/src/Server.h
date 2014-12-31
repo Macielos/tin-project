@@ -9,8 +9,6 @@
 #include <boost/thread.hpp>
 #include <boost/bind.hpp>
 
-#include <queue>
-
 #include <iostream>
 #include <sstream>
 #include <string>

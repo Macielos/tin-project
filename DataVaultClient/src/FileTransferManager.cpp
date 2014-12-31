@@ -63,7 +63,7 @@ void FileTransferManager::sendFile(string filename){
     }
 }
 
-void FileTransferManager::receiveFile(string filename)
+void FileTransferManager::receiveFile(string filename, bool confirm)
 {
     cout<<"receiving"<<endl;
     boost::array<char, 1024> buf;
@@ -73,6 +73,9 @@ void FileTransferManager::receiveFile(string filename)
         boost::asio::ip::tcp::acceptor acceptor(ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), dataPort));
         boost::asio::ip::tcp::socket socket(ioService);
         cout<<"ready"<<endl;
+        if(confirm){
+            sendConfirmation();
+        }
         acceptor.accept(socket);
 
         std::cout << "get client connection." << std::endl;
@@ -126,12 +129,27 @@ void FileTransferManager::receiveFile(string filename)
     }
 }
 
-void FileTransferManager::confirm(){
+void FileTransferManager::sendConfirmation(){
     cout<<"connecting..."<<endl;
     tcp::resolver resolver(ioService);
     tcp::resolver::query query(host, boost::lexical_cast<std::string>(dataPort+1));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     tcp::socket socket(ioService);
-    boost::asio::connect(socket, endpoint_iterator);
-    cout<<"connected"<<endl;
+    boost::system::error_code error;
+    int tries=10;
+    int i=0;
+    while(error && i<tries){
+        boost::asio::connect(socket, endpoint_iterator, error);
+        ++i;
+    }
+    cout<<"confirmed"<<endl;
+}
+
+void FileTransferManager::waitForConfirmation(){
+    cout<<"waiting..."<<endl;
+    boost::asio::ip::tcp::acceptor acceptor(ioService, boost::asio::ip::tcp::endpoint
+        (boost::asio::ip::tcp::v4(), dataPort+1));
+    boost::asio::ip::tcp::socket socket(ioService);
+    acceptor.accept(socket);
+    cout<<"confirmed"<<endl;
 }
