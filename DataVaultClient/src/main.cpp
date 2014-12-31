@@ -29,7 +29,7 @@ int main(int argc, char* argv[])
     string userId = "xyz";
     string sender = "localhost";
 
-    Action action = UPLOAD;
+ /*   Action action = UPLOAD;
     vector<string> parameters;
     parameters.push_back("TEST_FILE.txt");
     parameters.push_back("TEST_FILE2.txt");
@@ -49,10 +49,10 @@ int main(int argc, char* argv[])
         clientInterface.sendFile(parameters[i]);
        // cin >> a;
     }
+*/
 
 
-
-/*    clientInterface.init(host, messagePort, dataPort);
+    clientInterface.init(host, messagePort, dataPort);
 
     Action action2 = DOWNLOAD;
     vector<string> parameters2;
@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
     for(unsigned int i=0; i<parameters2.size(); ++i){
         clientInterface.receiveFile(parameters2[i], i!=0);
     }
-    messageSender.join();*/
+    messageSender.join();
     return 0;
 }
 

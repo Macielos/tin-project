@@ -137,13 +137,18 @@ void FileTransferManager::sendConfirmation(){
     tcp::socket socket(ioService);
     boost::system::error_code error;
     int tries=10;
-    int i=0;
-    while(error && i<tries){
+    for(int i=0; i<tries; ++i){
+        cout<<"trying to connect..."<<endl;
         boost::asio::connect(socket, endpoint_iterator, error);
-        ++i;
+        if(!error){
+            cout<<"connected & confirmed"<<endl;
+            return;
+        }
+        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
-    cout<<"confirmed"<<endl;
+    cerr<<"error: "<<error<<endl;
 }
+
 
 void FileTransferManager::waitForConfirmation(){
     cout<<"waiting..."<<endl;

@@ -140,13 +140,13 @@ void FileTransferManager::sendConfirmation(){
     for(int i=0; i<tries; ++i){
         cout<<"trying to connect..."<<endl;
         boost::asio::connect(socket, endpoint_iterator, error);
-        cout<<"error: "<<error<<endl;
         if(!error){
-            break;
+            cout<<"connected & confirmed"<<endl;
+            return;
         }
         boost::this_thread::sleep(boost::posix_time::milliseconds(100));
     }
-    cout<<"connected & confirmed"<<endl;
+    cerr<<"error: "<<error<<endl;
 }
 
 void FileTransferManager::waitForConfirmation(){

@@ -67,8 +67,11 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer("OK"), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"User "<<message.getUserId()<<" is downloading file "<<message.getParameters()[i]<<endl;
-                fileTransferManager->waitForConfirmation();
+                if(i!=0){
+                    fileTransferManager->waitForConfirmation();
+                }
                 fileTransferManager->sendFile(message.getSource(), message.getParameters()[i]);
+
                 //cin>>a;
                 cout<<"Done."<<endl;
             }

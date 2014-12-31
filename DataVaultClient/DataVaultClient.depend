@@ -74,7 +74,7 @@
 	<sstream>
 	"../DataVaultAPI/src/Message.h"
 
-1420041981 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/main.cpp
+1420046013 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/main.cpp
 	<iostream>
 	<boost/array.hpp>
 	<boost/asio.hpp>
@@ -82,6 +82,6 @@
 	<boost/bind.hpp>
 	"ClientInterface.h"
 
-1420041763 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/FileTransferManager.cpp
+1420047472 source:/home/maciek/workspace/cpp/tin-project/DataVaultClient/src/FileTransferManager.cpp
 	"FileTransferManager.h"
 
