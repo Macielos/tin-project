@@ -1,4 +1,4 @@
-#include "FileTransferManager.h"
+#include "../DataVaultAPI/src/FileTransferManager.h"
 #include "ServerStore.h"
 
 #include <boost/archive/text_iarchive.hpp>
@@ -27,15 +27,15 @@ class Server
 
         short messagePort;
         short dataPort;
+        short notificationPort;
         bool interrupted;
 
     public:
-        Server(short messagePort, short dataPort);
+        Server(short messagePort, short dataPort, short notificationPort);
         ~Server();
         void listen();
 
     private:
         void handleMessage(tcp::socket* socket);
-        void waitForConfirmation();
         template<typename T> void deserialize(T& t, string serializedData);
 };

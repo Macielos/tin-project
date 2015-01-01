@@ -11,25 +11,32 @@ Client::~Client()
     delete ioService;
 }
 
-void Client::init(string host, short messagePort, short dataPort){
+/**
+ *  Nawiąż połączenie z serwerem i przygotuj komponenty potrzebne do komunikacji oraz transferu plikow
+ */
+void Client::init(string host, short messagePort, short dataPort, short notificationPort){
     this->host = host;
     this->messagePort = messagePort;
     this->dataPort = dataPort;
+    this->notificationPort = notificationPort;
 
     cout<<"connecting"<<endl;
     ioService = new boost::asio::io_service();
 
     tcp::resolver resolver(*ioService);
-    tcp::resolver::query query(host, boost::lexical_cast<std::string>(messagePort));
+    tcp::resolver::query query(host, boost::lexical_cast<string>(messagePort));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
 
     socket = new tcp::socket(*ioService);
 
     boost::asio::connect(*socket, endpoint_iterator);
 
-    fileTransferManager = new FileTransferManager(*ioService, dataPort);
+    fileTransferManager = new FileTransferManager(*ioService, dataPort, notificationPort);
 }
 
+/**
+ *  Wyślij wiadomość do serwera i czekaj na odpowiedź
+ */
 string Client::send(Message& message){
     boost::array<char, 2048> messageBuffer;
     boost::system::error_code error;
@@ -49,13 +56,12 @@ string Client::send(Message& message){
     return string(messageBuffer.data());
 }
 
-void Client::sendFile(string filename){
-    fileTransferManager->sendFile(filename);
-    fileTransferManager->waitForConfirmation();
+void Client::sendFile(string filename, bool notify){
+    fileTransferManager->sendFile(host, filename, notify);
 }
 
-void Client::receiveFile(string filename, bool confirm){
-    fileTransferManager->receiveFile(filename, confirm);
+void Client::receiveFile(string filename, bool notify){
+    fileTransferManager->receiveFile(host, filename, notify);
 }
 
 template<typename T> string Client::serialize(T& t){

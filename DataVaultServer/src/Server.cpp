@@ -1,11 +1,11 @@
 #include "Server.h"
 
-Server::Server(short messagePort, short dataPort):
-    messagePort(messagePort), dataPort(dataPort), interrupted(false)
+Server::Server(short messagePort, short dataPort, short notificationPort):
+    messagePort(messagePort), dataPort(dataPort), notificationPort(notificationPort), interrupted(false)
 {
     serverStore = new ServerStore();
     ioService = new boost::asio::io_service();
-    fileTransferManager = new FileTransferManager(*ioService, dataPort);
+    fileTransferManager = new FileTransferManager(*ioService, dataPort, notificationPort);
     cout<<"Server created"<<endl;
 }
 
@@ -16,6 +16,10 @@ Server::~Server()
     delete serverStore;
 }
 
+/**
+ *  Główna pętla serwera. Serwer bedzie nasłuchiwal przychodzących połączeń. Dla nowego połączenia zostanie
+ *  uruchomiony nowy wątek, który je obsłuży przy użyciu osobnego gniazda.
+ */
 void Server::listen()
 {
     try{
@@ -32,6 +36,9 @@ void Server::listen()
     }
 }
 
+/**
+ *  Wątek obsługujący pojedynczą wiadomość przesłaną do serwera.
+ */
 void Server::handleMessage(tcp::socket* socket){
     boost::array<char, 2048> messageBuffer;
     boost::system::error_code error;
@@ -49,8 +56,6 @@ void Server::handleMessage(tcp::socket* socket){
     cout<<"Message: "<<endl;
     cout<<message.toString()<<endl;
 
-   // char a;
-
     switch(message.getAction()){
         case UPLOAD:
             dataPortAccessMutex.lock();
@@ -67,12 +72,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer("OK"), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"User "<<message.getUserId()<<" is downloading file "<<message.getParameters()[i]<<endl;
-                if(i!=0){
-                    fileTransferManager->waitForConfirmation();
-                }
-                fileTransferManager->sendFile(message.getSource(), message.getParameters()[i]);
-
-                //cin>>a;
+                fileTransferManager->sendFile(message.getSource(), message.getParameters()[i], true);
                 cout<<"Done."<<endl;
             }
             dataPortAccessMutex.unlock();

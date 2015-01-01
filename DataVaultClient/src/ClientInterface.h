@@ -7,8 +7,8 @@ class ClientInterface
     public:
         ClientInterface();
         ~ClientInterface();
-        void init(string host, short messagePort, short dataPort);
+        void init(string host, short messagePort, short dataPort, short notificationPort);
         string send(Message& message);
-        void sendFile(string filename);
-        void receiveFile(string filename, bool confirm);
+        void sendFile(string filename, bool notify);
+        void receiveFile(string filename, bool notify);
 };

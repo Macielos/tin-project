@@ -92,3 +92,66 @@
 
 1419899117 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Constants.h
 
+1420133051 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Message.cpp
+	"Message.h"
+
+1420133051 /home/maciek/workspace/tin-project/DataVaultAPI/src/Message.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+	"Constants.h"
+
+1420139877 /home/maciek/workspace/tin-project/DataVaultAPI/src/Constants.h
+
+1418935617 source:/home/maciek/workspace/tin-project/DataVaultServer/src/ServerStore.cpp
+	"ServerStore.h"
+
+1419165135 /home/maciek/workspace/tin-project/DataVaultServer/src/ServerStore.h
+	<string>
+
+1420136574 source:/home/maciek/workspace/tin-project/DataVaultServer/src/main.cpp
+	"Server.h"
+	<boost/lexical_cast.hpp>
+
+1420135112 /home/maciek/workspace/tin-project/DataVaultServer/src/Server.h
+	"../DataVaultAPI/src/FileTransferManager.h"
+	"ServerStore.h"
+	<boost/archive/text_iarchive.hpp>
+	<boost/array.hpp>
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/bind.hpp>
+	<iostream>
+	<sstream>
+	<string>
+
+1420133051 /home/maciek/workspace/tin-project/DataVaultServer/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"../DataVaultAPI/src/Message.h"
+
+1420138834 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/FileTransferManager.cpp
+	"FileTransferManager.h"
+
+1420135329 /home/maciek/workspace/tin-project/DataVaultAPI/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"../DataVaultAPI/src/Message.h"
+
+1420140844 source:/home/maciek/workspace/tin-project/DataVaultServer/src/Server.cpp
+	"Server.h"
+

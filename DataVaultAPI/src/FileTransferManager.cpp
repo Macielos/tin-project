@@ -1,7 +1,7 @@
 #include "FileTransferManager.h"
 
-FileTransferManager::FileTransferManager(boost::asio::io_service& ioService, short dataPort):
-    ioService(ioService), dataPort(dataPort)
+FileTransferManager::FileTransferManager(boost::asio::io_service& ioService, short dataPort, short notificationPort):
+    ioService(ioService), dataPort(dataPort), notificationPort(notificationPort)
 {
 
 }
@@ -11,17 +11,24 @@ FileTransferManager::~FileTransferManager()
 
 }
 
-void FileTransferManager::sendFile(string filename){
+/**
+ *  Wyslij plik. Parameter notify kaze metodzie czekac na powiadomienie od drugiej strony, ze jest gotowa do odebrania pliku
+ */
+void FileTransferManager::sendFile(string destination, string filename, bool notify){
     try{
+        if(notify){
+            waitForNotification();
+        }
         boost::system::error_code error = boost::asio::error::host_not_found;
+        //boost::array<char, 128> messageBuffer;
 
         tcp::resolver resolver(ioService);
-        tcp::resolver::query dataQuery(host, boost::lexical_cast<string>(dataPort));
+        tcp::resolver::query dataQuery(destination, boost::lexical_cast<string>(dataPort));
         tcp::resolver::iterator dataEndpointIterator = resolver.resolve(dataQuery);
 
         boost::asio::ip::tcp::socket dataSocket(ioService);
 
-        boost::asio::connect(dataSocket, dataEndpointIterator);
+        boost::asio::connect(dataSocket, dataEndpointIterator, error);
 
         boost::array<char, 1024> buf;
         std::ifstream sourceFile(filename.c_str(), std::ios_base::binary | std::ios_base::ate);
@@ -34,10 +41,9 @@ void FileTransferManager::sendFile(string filename){
         // first send file size to server
         boost::asio::streambuf request;
         std::ostream request_stream(&request);
-        request_stream << filename << "\n"
-            << fileSize << "\n\n";
+        request_stream << fileSize << "\n\n";
         boost::asio::write(dataSocket, request);
-        std::cout << "start sending content of "<<filename<<endl;
+        std::cout << "start sending file content.\n";
         while(!sourceFile.eof()){
             sourceFile.read(buf.c_array(), (std::streamsize)buf.size());
             if (sourceFile.gcount()<=0)
@@ -54,7 +60,7 @@ void FileTransferManager::sendFile(string filename){
                 return;
             }
         }
-        std::cout << "Sending file " << filename << " completed.\n";
+        std::cout << "Sending file " << filename << " completed successfully.\n";
         dataSocket.close();
     }
     catch (std::exception& e)
@@ -63,30 +69,31 @@ void FileTransferManager::sendFile(string filename){
     }
 }
 
-void FileTransferManager::receiveFile(string filename, bool confirm)
+/**
+ *  Pobierz plik. Parameter notify kaze metodzie wyslac drugiej stronie powiadomienie, ze plik moze byc przeslany
+ */
+void FileTransferManager::receiveFile(string source, string filename, bool confirm)
 {
-    cout<<"receiving"<<endl;
     boost::array<char, 1024> buf;
-    size_t fileSize = 0;
+    size_t file_size = 0;
     try {
+        boost::asio::ip::tcp::acceptor acceptor(ioService, boost::asio::ip::tcp::endpoint(
+            boost::asio::ip::tcp::v4(), dataPort));
         boost::system::error_code error;
-        boost::asio::ip::tcp::acceptor acceptor(ioService, boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), dataPort));
         boost::asio::ip::tcp::socket socket(ioService);
-        cout<<"ready"<<endl;
         if(confirm){
-            sendConfirmation();
+            sendNotification();
         }
         acceptor.accept(socket);
-
         std::cout << "get client connection." << std::endl;
         boost::asio::streambuf request_buf;
         boost::asio::read_until(socket, request_buf, "\n\n");
         std::cout<< "request size:" << request_buf.size() << "\n";
         std::istream request_stream(&request_buf);
-        request_stream >> fileSize;
+        request_stream >> file_size;
         request_stream.read(buf.c_array(), 2); // eat the "\n\n"
 
-        std::cout << filename << " size is " << fileSize << std::endl;
+        std::cout << filename << " size is " << file_size << std::endl;
         //size_t pos = file_path.find_last_of(`\\`);
         //if (pos!=std::string::npos)
         //    file_path = file_path.substr(pos+1);
@@ -110,8 +117,9 @@ void FileTransferManager::receiveFile(string filename, bool confirm)
             size_t len = socket.read_some(boost::asio::buffer(buf), error);
             if (len>0)
                 output_file.write(buf.c_array(), (std::streamsize)len);
-            if (output_file.tellp()== (std::fstream::pos_type)(std::streamsize)fileSize){
-                waitForConfirmation();
+            if (output_file.tellp()== (std::fstream::pos_type)(std::streamsize)file_size){
+                size_t len2 = socket.write_some(boost::asio::buffer("OK"), error);
+                cout<<"response sent: "<<len2<<endl;
                 socket.close();
                 break; // file was received
             }
@@ -122,7 +130,6 @@ void FileTransferManager::receiveFile(string filename, bool confirm)
             }
         }
         std::cout << "received " << output_file.tellp() << " bytes."<<endl;
-
     }
     catch (std::exception& e)
     {
@@ -130,31 +137,35 @@ void FileTransferManager::receiveFile(string filename, bool confirm)
     }
 }
 
-void FileTransferManager::sendConfirmation(){
+/**
+ *  Przeslij powiadomienie, ze kolejny plik moze zostac przeslany. Podjetych zostanie NOTIFICATION_RETRIES prob polaczenia z RETRY_INTERVAL milisekund przerwy pomiedzy kolejnymi probami
+ */
+void FileTransferManager::sendNotification(){
     cout<<"connecting..."<<endl;
     tcp::resolver resolver(ioService);
-    tcp::resolver::query query(host, boost::lexical_cast<std::string>(dataPort+1));
+    tcp::resolver::query query(host, boost::lexical_cast<std::string>(notificationPort));
     tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
     tcp::socket socket(ioService);
     boost::system::error_code error;
-    int tries=10;
-    for(int i=0; i<tries; ++i){
+    for(unsigned int i=0; i<NOTIFICATION_RETRIES; ++i){
         cout<<"trying to connect..."<<endl;
         boost::asio::connect(socket, endpoint_iterator, error);
         if(!error){
             cout<<"connected & confirmed"<<endl;
             return;
         }
-        boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+        boost::this_thread::sleep(boost::posix_time::milliseconds(RETRY_INTERVAL));
     }
     cerr<<"error: "<<error<<endl;
 }
 
-
-void FileTransferManager::waitForConfirmation(){
+/**
+ *  Nasluchuj powiadomienia z serwera, ze kolejny plik moze zostac przeslany.
+ */
+void FileTransferManager::waitForNotification(){
     cout<<"waiting..."<<endl;
     boost::asio::ip::tcp::acceptor acceptor(ioService, boost::asio::ip::tcp::endpoint
-        (boost::asio::ip::tcp::v4(), dataPort+1));
+        (boost::asio::ip::tcp::v4(), notificationPort));
     boost::asio::ip::tcp::socket socket(ioService);
     acceptor.accept(socket);
     cout<<"confirmed"<<endl;

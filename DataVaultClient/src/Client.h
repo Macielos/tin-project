@@ -1,5 +1,5 @@
 #include "ClientStore.h"
-#include "FileTransferManager.h"
+#include "../DataVaultAPI/src/FileTransferManager.h"
 #include "../DataVaultAPI/src/Message.h"
 
 #include <boost/archive/text_oarchive.hpp>
@@ -20,6 +20,7 @@ class Client
     string host;
     short messagePort;
     short dataPort;
+    short notificationPort;
 
     boost::asio::io_service* ioService;
     tcp::socket* socket;
@@ -28,9 +29,9 @@ class Client
     public:
         Client();
         ~Client();
-        void init(string host, short messagePort, short dataPort);
+        void init(string host, short messagePort, short dataPort, short notificationPort);
         string send(Message& message);
-        void sendFile(string filename);
-        void receiveFile(string filename, bool confirm);
+        void sendFile(string filename, bool notify);
+        void receiveFile(string filename, bool notify);
         template<typename T> string serialize(T& t);
 };
