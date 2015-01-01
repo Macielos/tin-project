@@ -9,9 +9,9 @@ sudo apt-get install libasio-dev
 - otwieracie oba projekty (DataVaultServer.cbp i DataVaultClient.cbp) w Codeblocksie
 - budujecie oba 
 - jak oba się zbudują, odpalacie - jeden w Codeblocksie, 2-gi w terminalu bądź oba w osobnych terminalach 
-- aby odpalić np. serwer w terminalu, przechodzicie do DataVaultServer/bin/Debug i piszecie w konsoli: 
-./DataVaultServer 21000 21001 - dla serwera, 
-./DataVaultClient localhost 21000 21001 - dla klienta
+- aby odpalić np. serwer w terminalu, przechodzicie do DataVaultServer/bin/Debug (dla klienta analogicznie) i piszecie w konsoli: 
+./DataVaultServer 21000 21001 21002 - dla serwera, 
+./DataVaultClient localhost 21000 21001 21002 - dla klienta
 (porty możecie sobie dobrać jak chcecie, byle były te same dla serwera i klienta).
 
 
