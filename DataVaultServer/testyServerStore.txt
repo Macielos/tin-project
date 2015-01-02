@@ -1,0 +1,38 @@
+//testy wywolywane w Server.cpp
+// wymagaly zmieniany ServerStore serveStore an public w Server.h
+
+//TESTY
+        string user1 = "janek";
+        string user2 = "stefan";
+        string name1 = "film.mkv";
+        string name2 = "muzyka.mp3";
+        string name3 = "obraz.jpg";
+
+        User user = User("janek");
+        serverStore.users.push_back(user);
+
+        cout<<"User janek created"<<endl;
+        cout<<"adding file film.mkv to user stefan "<<serverStore.add(user2, name1)<<endl;
+        cout<<"adding file film.mkv to user janek "<<serverStore.add(user1, name1)<<endl;
+        cout<<"adding file film.mkv to user janek "<<serverStore.add(user1, name1)<<endl;
+
+        cout<<"renaming file film.mkv to muzyka.mp3 user stafan "<<serverStore.rename(user2, name1, name2)<<endl;
+        cout<<"renaming file obraz.jpg to muzyka.mp3 user janek "<<serverStore.rename(user1, name3, name2)<<endl;
+        cout<<"renaming file film.mkv to muzyka.mp3 user janek "<<serverStore.rename(user1, name1, name2)<<endl;
+        cout<<"adding file obraz.jpg to user janek "<<serverStore.add(user1, name3)<<endl;
+        cout<<"renaming file obraz.jpg to muzyka.mp3 user janek "<<serverStore.rename(user1, name3, name2)<<endl;
+
+        vector<string> lista;
+        lista = serverStore.list(user1);
+        for(vector<string>::iterator it = lista.begin(); it != lista.end(); ++it)
+            cout<<*it<<" ";
+        cout<<endl;
+
+        cout<<"removing file film.mkv user stafan "<<serverStore.remove(user2, name1)<<endl;
+        cout<<"removing file obraz.jpg user janek "<<serverStore.remove(user1, name3)<<endl;
+        cout<<"removing file gilm.mkv user janek "<<serverStore.remove(user1, name1)<<endl;
+       
+        // koniec testow
+
+
+
