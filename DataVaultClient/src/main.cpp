@@ -8,10 +8,6 @@
 
 using namespace std;
 
-ClientInterface clientInterface;
-
-void sendMessage(Message* message);
-
 int main(int argc, char* argv[])
 {
     if (argc != 5){
@@ -24,7 +20,8 @@ int main(int argc, char* argv[])
     const short dataPort = atoi(argv[3]);
     const short notificationPort = atoi(argv[4]);
 
-   clientInterface.init(host, messagePort, dataPort, notificationPort);
+    ClientInterface clientInterface;
+    clientInterface.init(host, messagePort, dataPort, notificationPort);
 
     string userId = "xyz";
     string sender = "localhost";
