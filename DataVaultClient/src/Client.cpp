@@ -6,7 +6,7 @@
  */
 #include "Client.h"
 
-Client::Client()
+Client::Client() : socket(ioService)
 {
     host = "";
     messagePort = 0;
@@ -16,15 +16,13 @@ Client::Client()
 
     validParameters = false;
     connected = false;
-    logged = false;
-
-    ioService = new boost::asio::io_service();
+    logged = true;
 }
 
 Client::~Client()
 {
  //   delete socket;
-    delete ioService;
+ //   delete ioService;
 }
 
 /*
@@ -119,20 +117,22 @@ bool Client::connect()
     }
     try
     {
-        tcp::resolver resolver(*ioService);
+        tcp::resolver resolver(ioService);
         tcp::resolver::query query(host, boost::lexical_cast<std::string>(messagePort));
-        tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
+        boost::asio::ip::tcp::resolver::iterator destination = resolver.resolve(query);
+        boost::asio::ip::tcp::resolver::iterator end;
 
-        socket = new tcp::socket(*ioService);
-
-        boost::asio::connect(*socket, endpoint_iterator);
+        while ( destination != end )
+        {
+            endpoint = *destination++;
+        }
 
         connected = true;
         return true;
     }
     catch (boost::system::system_error err)
     {
-        cout << "# BŁĄD: Nie można nazwiązać połączenia z serwerem!\n";
+        cout << "# BŁĄD: Nie można nawiązać połączenia z serwerem!\n";
     }
     return false;
 }
@@ -144,15 +144,20 @@ string Client::sendMessage(Message& message)
 
     try
     {
+        socket.connect(endpoint); // otwarcie socketa
         cout << "Wysyłanie polecenia od: " << message.getUserId() << endl;
         string serializedMessage = serialize(message);
-        write(*socket, boost::asio::buffer(serializedMessage), error);
-        socket->read_some(boost::asio::buffer(messageBuffer), error);
+        write(socket, boost::asio::buffer(serializedMessage), error);
+        socket.read_some(boost::asio::buffer(messageBuffer), error);
 
         if (error)
         {
             throw boost::system::system_error(error);
         }
+
+        // zamknięcie socketa
+        socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+        socket.close();
     }
     catch (std::exception& e)
     {

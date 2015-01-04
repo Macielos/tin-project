@@ -35,8 +35,9 @@ class Client
         bool connected;         // flaga mówiąca czy jest aktywne połączenie z serwerem
         bool logged;            // flaga mówiąca czy użytkownik jest akutalnie zalogowany (czy może operować na plikach)
 
-        boost::asio::io_service* ioService;
-        tcp::socket* socket;
+        boost::asio::io_service ioService;
+        boost::asio::ip::tcp::socket socket;
+        boost::asio::ip::tcp::endpoint endpoint;
 
         void checkParamCorrectness(); // sprawdza czy host, message/dataPort są poprawne -> czy można próbować łączyć
 

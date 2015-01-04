@@ -67,14 +67,14 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
 /**
  *  Oczekuje na wpisanie komendy przez użytkownika, a następnie przekazuje ją do interpretacji.
  */
- bool ClientInterface::getCommand()
- {
+bool ClientInterface::getCommand()
+{
     string s;
     command.clear();
     cout << "\n>";
     getline(cin, s);
     return interpretCommand(s);
- }
+}
 
 /**
  *  Interpertuje komendę wpisaną przez użytkownika. Zwracana wartość 0 - koniec działania programu.
@@ -104,6 +104,11 @@ bool ClientInterface::interpretCommand(string commandLine)
     {
         connect();
     }
+    // DISCONNECT
+    else if (c == "disconnect")
+    {
+
+    }
     // SET...
     else if (c == "set")
     {
@@ -126,7 +131,7 @@ bool ClientInterface::interpretCommand(string commandLine)
         }
         else
         {
-            cout << "# BŁĄD: Nie rozpoznano parametru set!\n";
+            cout << "# BŁĄD: Nie rozpoznano parametru '" << c_t << "'!\n";
         }
     }
     /*
@@ -249,11 +254,19 @@ void ClientInterface::followTaskOnServer(Action action)
 {
     if (client.isConnected())
     {
-        string userId = "user123";
-        Message message(userId, action, command);
+        // jeśli klient nie jest zalogowany (uwierzytelniony) i akcja nie dotyczy rejestracji / logowania
+        if ( (client.isLogged() == false) && (action != REGISTER) && (action != LOGIN) && (action != UNREGISTER) )
+        {
+            cout << "# BŁĄD: Nie jesteś zalogowany, aby móc wykonać tę akcję! Użyj polecenia login [login] [hasło]\n";
+        }
+        else
+        {
+            string userId = "user123";
+            Message message(userId, action, command);
 
-        string response = sendMessage(message);
-        cout << "Odpowiedź: " << response << endl;
+            string response = sendMessage(message);
+            cout << "Odpowiedź: " << response << endl;
+        }
     }
     else
     {
