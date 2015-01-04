@@ -1,53 +1,173 @@
+/**
+ *  ### Client.cpp ###
+ *
+ *      Ciało klasy Client.
+ *
+ */
 #include "Client.h"
 
-Client::Client()
+Client::Client() : socket(ioService)
 {
+    host = "";
+    messagePort = 0;
+    dataPort = 0;
+    userId = "";
+    password = "";
 
+    validParameters = false;
+    connected = false;
+    logged = true;
 }
 
 Client::~Client()
 {
-    delete socket;
-    delete ioService;
+ //   delete socket;
+ //   delete ioService;
 }
 
-void Client::init(string host, short messagePort, short dataPort){
-    this->host = host;
-    this->messagePort = messagePort;
-    this->dataPort = dataPort;
-
-    cout<<"connecting"<<endl;
-    ioService = new boost::asio::io_service();
-
-    tcp::resolver resolver(*ioService);
-    tcp::resolver::query query(host, boost::lexical_cast<std::string>(messagePort));
-    tcp::resolver::iterator endpoint_iterator = resolver.resolve(query);
-
-    socket = new tcp::socket(*ioService);
-
-    boost::asio::connect(*socket, endpoint_iterator);
+/*
+    SETery parametrów połączenia. Wartość logiczna określa czy parametr został dodany poprawnie.
+*/
+bool Client::setHost(string host)
+{
+    if ( (host.length() > 3) && (host.length() < 100) )
+    {
+        this->host = host;
+        checkParamCorrectness();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
 }
 
-string Client::send(Message& message){
+bool Client::setMessagePort(int messagePort)
+{
+    if ( (messagePort > 1023) && (messagePort < 65536) )
+    {
+        this->messagePort = messagePort;
+        checkParamCorrectness();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+bool Client::setDataPort(int dataPort)
+{
+    if ( (dataPort > 1023) && (dataPort < 65536) )
+    {
+        this->dataPort = dataPort;
+        checkParamCorrectness();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+/*
+    GETery flag.
+*/
+bool Client::isValidParameters()
+{
+    return validParameters;
+}
+
+bool Client::isConnected()
+{
+    return connected;
+}
+
+bool Client::isLogged()
+{
+    return logged;
+}
+
+/**
+ *  Sprawdza czy wszystkie parametry połączenia są poprawne. W zależności ustawia flagę.
+ */
+void Client::checkParamCorrectness()
+{
+    if ( (host.length() > 3)
+        && ((dataPort > 1023) && (dataPort < 65536))
+        && ((messagePort > 1023) && (messagePort < 65536)) )
+    {
+        validParameters = true;
+    }
+    else
+    {
+        validParameters = false;
+    }
+}
+
+/**
+ *  Nawiązuje połączenie z serwerem.
+ */
+bool Client::connect()
+{
+    connected = false;
+    if (validParameters == false) // jeśli (parametry nie poprawne) nic nie rób
+    {
+        return false;
+    }
+    try
+    {
+        tcp::resolver resolver(ioService);
+        tcp::resolver::query query(host, boost::lexical_cast<std::string>(messagePort));
+        boost::asio::ip::tcp::resolver::iterator destination = resolver.resolve(query);
+        boost::asio::ip::tcp::resolver::iterator end;
+
+        while ( destination != end )
+        {
+            endpoint = *destination++;
+        }
+
+        connected = true;
+        return true;
+    }
+    catch (boost::system::system_error err)
+    {
+        cout << "# BŁĄD: Nie można nawiązać połączenia z serwerem!\n";
+    }
+    return false;
+}
+
+string Client::sendMessage(Message& message)
+{
     boost::array<char, 128> messageBuffer;
     boost::system::error_code error;
 
-    try{
-        cout<<"Writing message of "<<message.getUserId()<<endl;
+    try
+    {
+        socket.connect(endpoint); // otwarcie socketa
+        cout << "Wysyłanie polecenia od: " << message.getUserId() << endl;
         string serializedMessage = serialize(message);
-        write(*socket, boost::asio::buffer(serializedMessage), error);
-        socket->read_some(boost::asio::buffer(messageBuffer), error);
-        cout<<"Reading "<<messageBuffer.data()<<endl;
-        if (error){
+        write(socket, boost::asio::buffer(serializedMessage), error);
+        socket.read_some(boost::asio::buffer(messageBuffer), error);
+
+        if (error)
+        {
             throw boost::system::system_error(error);
         }
-    }catch (std::exception& e){
+
+        // zamknięcie socketa
+        socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+        socket.close();
+    }
+    catch (std::exception& e)
+    {
         std::cerr << e.what() << std::endl;
     }
     return string(messageBuffer.data());
 }
 
-template<typename T> string Client::serialize(T& t){
+template<typename T> string Client::serialize(T& t)
+{
     std::ostringstream archive_stream;
     boost::archive::text_oarchive archive(archive_stream);
     archive << t;
