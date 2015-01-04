@@ -104,11 +104,6 @@ bool ClientInterface::interpretCommand(string commandLine)
     {
         connect();
     }
-    // DISCONNECT
-    else if (c == "disconnect")
-    {
-
-    }
     // SET...
     else if (c == "set")
     {
@@ -120,12 +115,12 @@ bool ClientInterface::interpretCommand(string commandLine)
             changeParameter(HOST, command[1]);
         }
         // ...MESSAGE_PORT
-        else if ( (c_t == "message_port") || ( c_t == "mport") || ( c_t == "messageport") )
+        else if ( (c_t == "message_port") || ( c_t == "portp") || ( c_t == "mport") || ( c_t == "messageport") )
         {
             changeParameter(MESSAGE_PORT, command[1]);
         }
         // ...DATA_PORT
-        else if ( (c_t == "data_port") || ( c_t == "dport") || ( c_t == "dataport") )
+        else if ( (c_t == "data_port") || ( c_t == "portd") || ( c_t == "dport") || ( c_t == "dataport") )
         {
             changeParameter(DATA_PORT, command[1]);
         }
@@ -306,8 +301,21 @@ string ClientInterface::sendMessage(Message& message)
  */
  void ClientInterface::showHelp()
  {
-    cout << "\n\n\n\t\tDATA VAULT\n\n";
-    cout << "\tlogin        - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\tprzykład użycia: login user123 pass456\n";
-    cout << "\tregister     - rejestruje użytkownika na serwerze przy użyciu loginu i hasła\n\t\tprzykład użycia: register user123 pass456 pass456\n";
-    cout << endl;
+    cout << "\n\n\n\t\tDATA VAULT\n\n"
+     << "  set          - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd] [wartość]\n"
+     << "  connect      - ustanawia połączenie z serwerem\n\t\t\tbez parametrów\n"
+     << "  login        - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\t\tskładnia: login [nazwa użytkownika] [hasło]\n"
+     << "  logout       - wylogowuje użytkownika z serwera\n\t\t\tbez parametrów\n"
+     << "  register     - rejestruje użytkownika na serwerze przy użyciu loginu i hasła\n\t\t\tskładnia: register [nazwa użytkownika] [hasło] [powtórz hasło]\n"
+     << "  unregister   - wyrejestrowuje użytkownika z serwera\n\t\t\tskładnia: unregister [nazwa użytkownika] [hasło]\n"
+     << "  list         - pokazuje informacje o plikach\n\t\t\tskładnia: list [parametr]\n"
+     << "  upload       - wysyła plik z dysku lokalnego na serwer\n\t\t\tskładnia: upload [nazwa pliku(ścieżka względem programu)]\n"
+     << "  download     - pobiera plik z serwera na dysk lokalny\n\t\t\tskładnia: download [nazwa pliku na serwerze]\n"
+     << "  remove       - usuwa plik z serwera\n\t\t\tskładnia: remove [nazwa pliku]\n"
+     << "  rename       - zmienia nazwę pliku na serwerze\n\t\t\tskładnia: rename [nazwa pliku (stara)] [nazwa pliku (nowa)]\n"
+     << "  give access  - przyznaje dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: give access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
+     << "  revoke access- odbiera dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: revoke access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
+     << "  help         - pokazuje tą pomoc\n"
+     << "  exit/quit    - wchodzi z programu\n"
+     << endl;
  }
