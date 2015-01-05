@@ -23,57 +23,57 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
 {
     switch (param)
     {
-    case HOST:
-    {
-        if (client.setHost(value))
+        case HOST:
         {
-            cout << "Wczytano parametr: host: " << value << "\n";
+            if (client.setHost(value))
+            {
+                cout << "Wczytano parametr: host: " << value << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawna nazwa hosta!\n";
+            }
+            break;
         }
-        else
+        case MESSAGE_PORT:
         {
-            cout << "# BŁĄD: Niepoprawna nazwa hosta!\n";
+            int messagePort = atoi(value.c_str());
+            if (client.setMessagePort(messagePort))
+            {
+                cout << "Wczytano parametr: port poleceń: " << messagePort << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawny numer portu poleceń!\n";
+            }
+            break;
         }
-        break;
-    }
-    case MESSAGE_PORT:
-    {
-        int messagePort = atoi(value.c_str());
-        if (client.setMessagePort(messagePort))
+        case DATA_PORT:
         {
-            cout << "Wczytano parametr: port poleceń: " << messagePort << "\n";
+            int dataPort = atoi(value.c_str());
+            if (client.setDataPort(dataPort))
+            {
+                cout << "Wczytano parametr: port danych: " << dataPort << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawny numer portu danych!\n";
+            }
+            break;
         }
-        else
+        case NOTIFICATION_PORT:
         {
-            cout << "# BŁĄD: Niepoprawny numer portu poleceń!\n";
+            int notificationPort = atoi(value.c_str());
+            if (client.setNotificationPort(notificationPort))
+            {
+                cout << "Wczytano parametr: port powiadomień: " << notificationPort << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawny numer portu powiadomień!\n";
+            }
+            break;
         }
-        break;
-    }
-    case DATA_PORT:
-    {
-        int dataPort = atoi(value.c_str());
-        if (client.setDataPort(dataPort))
-        {
-            cout << "Wczytano parametr: port danych: " << dataPort << "\n";
-        }
-        else
-        {
-            cout << "# BŁĄD: Niepoprawny numer portu danych!\n";
-        }
-        break;
-    }
-    case NOTIFICATION_PORT:
-    {
-        int notificationPort = atoi(value.c_str());
-        if (client.setNotificationPort(notificationPort))
-        {
-            cout << "Wczytano parametr: port powiadomień: " << notificationPort << "\n";
-        }
-        else
-        {
-            cout << "# BŁĄD: Niepoprawny numer portu powiadomień!\n";
-        }
-        break;
-    }
     }
 }
 
@@ -246,7 +246,7 @@ void ClientInterface::splitCommandToWords(string commandLine)
 /**
  *  Sprawdza istnienie pliku na dysku.
  */
-inline bool ClientInterface::checkFileExist (const std::string& name)
+inline bool ClientInterface::checkFileExist (const string& name)
 {
     struct stat buffer;
     return (stat (name.c_str(), &buffer) == 0);
@@ -296,58 +296,119 @@ void ClientInterface::followTaskOnServer(Action action)
         }
         else
         {
-            checkFilenamesCorectness();
-            if (command.size() == 0)
+            if (action == UPLOAD)
             {
-                return;
+                checkFilenamesCorectness();
+                if (command.size() == 0)
+                {
+                    return;
+                }
             }
 
             Message message(action, command);
             Response* response = client.sendMessage(message);
 
-            if (response->getStatus() == OK)
+            if (action == UPLOAD)
             {
-                bool result;
-                if (action == UPLOAD)
-                {
-                    for (unsigned int i = 0; i < message.getParameters().size(); ++i)
-                    {
-                        if (!checkFileExist(message.getParameters()[i])) // jeśli przetwarzany plik nie istnieje
-                        {
-                            cout << "# BŁĄD: Nie można odnaleźć pliku '" << message.getParameters()[i] << "'!" << endl;
-                            break;
-                        }
-                        cout << "Przesyłanie pliku " << message.getParameters()[i] << "..." << endl;
-                        result = client.sendFile(message.getParameters()[i], i != 0);
-                        if(!result)
-                        {
-                            cout << "# BŁĄD: Nie udało się wysłać pliku na serwer!" << endl;
-                            break;
-                        }
-                        cout << "Plik został pomyślnie załadowany na serwer." << endl;
-                    }
-                }
-                else if (action == DOWNLOAD)
-                {
-                    for (unsigned int i = 0; i < message.getParameters().size(); ++i)
-                    {
-                        cout << "Pobieranie pliku " << message.getParameters()[i] << endl;
-                        result = client.receiveFile(message.getParameters()[i], true);
-                        if (!result)
-                        {
-                            cout << "# BŁĄD: Nie udało się pobrać pliku!" << endl;
-                            break;
-                        }
-                        cout << "Plik został pomyślnie pobrany z serwera." << endl;
-                    }
-                }
+                processResponseUPLOAD(response, message);
             }
+            else if (action == DOWNLOAD)
+            {
+                processResponseDOWNLOAD(response, message);
+            }
+
             delete response;
         }
     }
     else
     {
         cout << "# BŁĄD: Brak połączenia z serwerem! Użyj polecenia: connect\n";
+    }
+}
+
+/**
+ *  Przetwarzanie akcji UPLOAD.
+ */
+void ClientInterface::processResponseUPLOAD(Response* response, Message& message)
+{
+    switch (response->getStatus())
+    {
+        case OK:
+        {
+            bool result;
+            for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+            {
+                if (!checkFileExist(message.getParameters()[i])) // jeśli przetwarzany plik nie istnieje
+                {
+                    cout << "# BŁĄD: Nie można odnaleźć pliku '" << message.getParameters()[i] << "'!" << endl;
+                    break;
+                }
+                cout << "Przesyłanie pliku \"" << message.getParameters()[i] << "\"..." << endl;
+                result = client.sendFile(message.getParameters()[i], i != 0);
+                if(!result)
+                {
+                    cout << "# BŁĄD: Nie udało się wysłać pliku na serwer!" << endl;
+                    break;
+                }
+            }
+            break;
+        }
+        case WRONG_SYNTAX: // co tu ma być? kiedy jest taki response?!
+        {
+            cout << "# BŁĄD: Wrong SYNTAX error." << endl;
+            break;
+        }
+        case FILE_EXISTS:
+        {
+            cout << "Plik o podanej nazwie już istnieje na serwerze. " << endl;
+            break;
+        }
+        default:
+        {
+        }
+    }
+}
+
+/**
+ *  Przetwarzanie akcji DOWNLOAD.
+ */
+void ClientInterface::processResponseDOWNLOAD(Response* response, Message& message)
+{
+    switch (response->getStatus())
+    {
+        case OK:
+        {
+            bool result;
+            for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+            {
+                cout << "Pobieranie pliku " << message.getParameters()[i] << endl;
+                result = client.receiveFile(message.getParameters()[i], true);
+                if (!result)
+                {
+                    cout << "# BŁĄD: Nie udało się pobrać pliku!" << endl;
+                    break;
+                }
+            }
+            break;
+        }
+        case WRONG_SYNTAX: // co tu ma być? kiedy jest taki response?!
+        {
+            cout << "# BŁĄD: Wrong SYNTAX error." << endl;
+            break;
+        }
+        case NO_SUCH_FILE:
+        {
+            cout << "Plik o podanej nazwie nie istnieje na serwerze. " << endl;
+            break;
+        }
+        case ACCESS_DENIED:
+        {
+            cout << "Nie masz dostępu do tego pliku." << endl;
+            break;
+        }
+        default:
+        {
+        }
     }
 }
 
