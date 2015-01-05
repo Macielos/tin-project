@@ -6,13 +6,13 @@
  */
 #include "Client.h"
 
-Client::Client() : socket(ioService)
+Client::Client() : socket(ioService), fileTransferManager(ioService)
 {
     host = "";
     messagePort = 0;
     dataPort = 0;
-    userId = "";
-    password = "";
+    userId = "user123";
+    password = "abc";
 
     validParameters = false;
     connected = false;
@@ -21,13 +21,11 @@ Client::Client() : socket(ioService)
 
 Client::~Client()
 {
- //   delete socket;
- //   delete ioService;
 }
 
-/*
-    SETery parametrów połączenia. Wartość logiczna określa czy parametr został dodany poprawnie.
-*/
+/**
+ *   SETery parametrów połączenia. Wartość logiczna określa czy parametr został dodany poprawnie.
+ */
 bool Client::setHost(string host)
 {
     if ( (host.length() > 3) && (host.length() < 100) )
@@ -61,6 +59,7 @@ bool Client::setDataPort(int dataPort)
     if ( (dataPort > 1023) && (dataPort < 65536) )
     {
         this->dataPort = dataPort;
+        fileTransferManager.setDataPort(dataPort);
         checkParamCorrectness();
         return true;
     }
@@ -69,6 +68,22 @@ bool Client::setDataPort(int dataPort)
         return false;
     }
 }
+
+bool Client::setNotificationPort(int notificationPort)
+{
+    if ( (dataPort > 1023) && (dataPort < 65536) )
+    {
+        this->notificationPort = notificationPort;
+        fileTransferManager.setNotificationPort(notificationPort);
+        checkParamCorrectness();
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 
 /*
     GETery flag.
@@ -93,9 +108,11 @@ bool Client::isLogged()
  */
 void Client::checkParamCorrectness()
 {
-    if ( (host.length() > 3)
-        && ((dataPort > 1023) && (dataPort < 65536))
-        && ((messagePort > 1023) && (messagePort < 65536)) )
+    if ( host.length() > 3
+        && dataPort > 1023 && dataPort < 65536
+        && messagePort > 1023 && messagePort < 65536
+        && notificationPort > 1023 && notificationPort < 65536
+        )
     {
         validParameters = true;
     }
@@ -137,33 +154,43 @@ bool Client::connect()
     return false;
 }
 
-string Client::sendMessage(Message& message)
+Response* Client::sendMessage(Message& message)
 {
-    boost::array<char, 128> messageBuffer;
+    boost::array<char, 128> responseBuffer;
     boost::system::error_code error;
+    Response* response = new Response();
 
-    try
+    // otwarcie gniazda
+    socket.connect(endpoint);
+
+    message.setUserId(userId);
+    message.setSource(socket.remote_endpoint().address().to_string());
+
+    cout << "Wysyłanie polecenia od: " << message.getUserId() << endl;
+    string serializedMessage = serialize(message);
+    write(socket, boost::asio::buffer(serializedMessage), error);
+    socket.read_some(boost::asio::buffer(responseBuffer), error);
+    if (error)
     {
-        socket.connect(endpoint); // otwarcie socketa
-        cout << "Wysyłanie polecenia od: " << message.getUserId() << endl;
-        string serializedMessage = serialize(message);
-        write(socket, boost::asio::buffer(serializedMessage), error);
-        socket.read_some(boost::asio::buffer(messageBuffer), error);
-
-        if (error)
-        {
-            throw boost::system::system_error(error);
-        }
-
-        // zamknięcie socketa
-        socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
-        socket.close();
+        cerr<<error<<endl;
+        return response;
     }
-    catch (std::exception& e)
-    {
-        std::cerr << e.what() << std::endl;
-    }
-    return string(messageBuffer.data());
+    deserialize(*response, responseBuffer.data());
+
+    //zamknięcie gniazda
+    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+    socket.close();
+    return response;
+}
+
+bool Client::sendFile(string filename, bool notify)
+{
+    return fileTransferManager.sendFile(host, filename, notify);
+}
+
+bool Client::receiveFile(string filename, bool notify)
+{
+    return fileTransferManager.receiveFile(host, filename, notify);
 }
 
 template<typename T> string Client::serialize(T& t)
@@ -172,4 +199,11 @@ template<typename T> string Client::serialize(T& t)
     boost::archive::text_oarchive archive(archive_stream);
     archive << t;
     return archive_stream.str();
+}
+
+template<typename T> void Client::deserialize(T& t, string serializedData)
+{
+    std::istringstream archive_stream(serializedData);
+    boost::archive::text_iarchive archive(archive_stream);
+    archive >> t;
 }

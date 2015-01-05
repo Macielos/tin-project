@@ -13,7 +13,7 @@ ClientInterface::ClientInterface()
 
 ClientInterface::~ClientInterface()
 {
-    //dtor
+
 }
 
 /**
@@ -61,6 +61,19 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
             }
             break;
         }
+        case NOTIFICATION_PORT:
+        {
+            int notificationPort = atoi(value.c_str());
+            if (client.setNotificationPort(notificationPort))
+            {
+                cout << "Wczytano parametr: port powiadomień: " << notificationPort << "\n";
+            }
+            else
+            {
+                cout << "# BŁĄD: Niepoprawny numer portu powiadomień!\n";
+            }
+            break;
+        }
     }
 }
 
@@ -71,17 +84,21 @@ bool ClientInterface::getCommand()
 {
     string s;
     command.clear();
-    cout << "\n>";
+    cout << "\n> ";
     getline(cin, s);
     return interpretCommand(s);
 }
 
 /**
- *  Interpertuje komendę wpisaną przez użytkownika. Zwracana wartość 0 - koniec działania programu.
+ *  Interpretuje komendę wpisaną przez użytkownika. Zwracana wartość 0 - koniec działania programu.
  */
 bool ClientInterface::interpretCommand(string commandLine)
 {
     splitCommandToWords(commandLine);
+    if(command.size()==0){
+        return true;
+    }
+
     string c = command[0]; // pierwsze słowo - jakie działanie
     transform(c.begin(), c.end(), c.begin(), ::tolower); // wszystkie litery małe
     command.erase(command.begin()); // usunięcie z vectora pierwszego wyrazu (bo dalej niepotrzebny)
@@ -216,30 +233,7 @@ bool ClientInterface::interpretCommand(string commandLine)
 void ClientInterface::splitCommandToWords(string commandLine)
 {
     command.clear();
-    string s = commandLine, word = "";
-    unsigned char c;
-
-    s += " "; // dodajemy wartownika
-
-    for(unsigned int i = 0; i < s.length(); i++)
-    {
-        c = s[i]; // przechodzimy po kolejnych literach
-        if(((c >= '0') && (c <= '9')) || (c == '_') || (c == '-')  ||
-            ((c >= 'A') && (c <= 'Z')) ||((c >= 'a') && (c <= 'z')) ||
-            (c == 164) || (c == 165)  || (c == 143) || (c == 134)  ||
-            (c == 168) || (c == 169)  || (c == 157) || (c == 136)  ||
-            (c == 227) || (c == 228)  || (c == 224) || (c == 162)  ||
-            (c == 151) || (c == 152)  || (c == 141) || (c == 171)  ||
-            (c == 189) || (c == 190))
-        {
-            word += c;
-        }
-        else if(word != "")
-        {
-            command.push_back(word);
-            word = "";
-        }
-    }
+    boost::algorithm::split(command, commandLine, boost::algorithm::is_any_of(" "));
 }
 
 /**
@@ -250,17 +244,43 @@ void ClientInterface::followTaskOnServer(Action action)
     if (client.isConnected())
     {
         // jeśli klient nie jest zalogowany (uwierzytelniony) i akcja nie dotyczy rejestracji / logowania
-        if ( (client.isLogged() == false) && (action != REGISTER) && (action != LOGIN) && (action != UNREGISTER) )
+        if ( !client.isLogged()
+                && action != REGISTER
+                && action != LOGIN
+                && action != UNREGISTER )
         {
             cout << "# BŁĄD: Nie jesteś zalogowany, aby móc wykonać tę akcję! Użyj polecenia login [login] [hasło]\n";
         }
         else
         {
-            string userId = "user123";
-            Message message(userId, action, command);
+            Message message(action, command);
 
-            string response = sendMessage(message);
-            cout << "Odpowiedź: " << response << endl;
+            Response* response = client.sendMessage(message);
+            cout << "Odpowiedź: " << response->toString() << endl;
+
+            bool result;
+            if(action == UPLOAD){
+                for(unsigned int i=0; i<message.getParameters().size(); ++i){
+                    cout << "Przesyłanie pliku "<<message.getParameters()[i] << endl;
+                    result = client.sendFile(message.getParameters()[i], i!=0);
+                    if(!result){
+                        cout << "Nie przesłano pliku" << endl;
+                        break;
+                    }
+                    cout << "Gotowe." << endl;
+                }
+            } else if (action == DOWNLOAD){
+                for(unsigned int i=0; i<message.getParameters().size(); ++i){
+                    cout << "Pobieranie pliku "<<message.getParameters()[i] << endl;
+                    result = client.receiveFile(message.getParameters()[i], true);
+                    if(!result){
+                        cout << "Nie przesłano pliku" << endl;
+                        break;
+                    }
+                    cout << "Gotowe." << endl;
+                }
+            }
+            delete response;
         }
     }
     else
@@ -289,14 +309,6 @@ void ClientInterface::connect()
 }
 
 /**
- *  Wysyła polecenie do serwera.
- */
-string ClientInterface::sendMessage(Message& message)
-{
-    return client.sendMessage(message);
-}
-
-/**
  *  Wypisuje pomoc dotyczącą poleceń programu.
  */
  void ClientInterface::showHelp()
@@ -315,7 +327,7 @@ string ClientInterface::sendMessage(Message& message)
      << "  rename       - zmienia nazwę pliku na serwerze\n\t\t\tskładnia: rename [nazwa pliku (stara)] [nazwa pliku (nowa)]\n"
      << "  give access  - przyznaje dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: give access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
      << "  revoke access- odbiera dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: revoke access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
-     << "  help         - pokazuje tą pomoc\n"
+     << "  help         - pokazuje tę pomoc\n"
      << "  exit/quit    - wchodzi z programu\n"
      << endl;
  }

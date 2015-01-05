@@ -8,28 +8,26 @@
  */
 #include "Client.h"
 #include <algorithm>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
 
 using std::vector;
 
-enum ConnectionParameter {HOST, MESSAGE_PORT, DATA_PORT};
+enum ConnectionParameter {HOST, MESSAGE_PORT, DATA_PORT, NOTIFICATION_PORT};
 
 class ClientInterface
 {
-    private:
         Client client;          // klient do zestawienia połączenia z serwerem
         vector<string> command; // polecenie (komenda) wpisana przez użytkownika podzielona na wyrazy
-
-        void splitCommandToWords(string commandLine);
-        bool interpretCommand(string commandLine);
-        void followTaskOnServer(Action action);
-        string sendMessage(Message& message);
-        void showHelp();
-        void connect();
-
     public:
         ClientInterface();
         ~ClientInterface();
-
         void changeParameter(ConnectionParameter param, string value);
         bool getCommand();
+    private:
+        void splitCommandToWords(string commandLine);
+        bool interpretCommand(string commandLine);
+        void followTaskOnServer(Action action);
+        void showHelp();
+        void connect();
 };
