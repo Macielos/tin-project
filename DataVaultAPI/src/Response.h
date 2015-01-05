@@ -10,7 +10,26 @@ using namespace std;
 /**
  *  Status wysyłany zwrotnie do klienta po obsłużeniu żądania
  */
-enum Status {OK, WRONG_SYNTAX, NO_SUCH_FILE, FILE_EXISTS, ACCESS_DENIED, NOT_IMPLEMENTED};
+enum Status
+{
+    // ogólnego przeznaczenia
+    OK,
+    WRONG_SYNTAX,
+    // LOGIN | UNREGISTER
+    INCORRECT_LOGIN,
+    INCORRECT_PASSWORD,
+    // REGISTER
+    USERNAME_USED,
+    // DOWNLOAD | REMOVE | RENAME
+    NO_SUCH_FILE,
+    ACCESS_DENIED,
+    // UPLOAD
+    FILE_EXISTS,
+    // GIVE_ACCESS | REVOKE_ACCESS
+    //    (w sumie tutaj INCORRECT_LOGIN i NO_SUCH_FILE)
+    // inne
+    NOT_IMPLEMENTED
+};
 
 class Response
 {
