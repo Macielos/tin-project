@@ -8,12 +8,13 @@
 
 #include <deque>
 
+
 using namespace std;
 using boost::asio::ip::tcp;
 
 class Server
 {
-        ServerStore serverStore;
+
 
         deque<Message*> messages;
 
@@ -22,6 +23,9 @@ class Server
         bool interrupted;
 
     public:
+        // testy
+        ServerStore serverStore;
+        // koniec testow
         Server(short messagePort, short dataPort);
         ~Server();
         void listen();
