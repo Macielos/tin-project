@@ -145,7 +145,7 @@ bool ClientInterface::interpretCommand(string commandLine)
         // ...NOTIFICATION_PORT
         else if ( (c_t == "notification_port") || ( c_t == "portn") || ( c_t == "nport") || ( c_t == "notificationport") )
         {
-            changeParameter(DATA_PORT, command[1]);
+            changeParameter(NOTIFICATION_PORT, command[1]);
         }
         else
         {
