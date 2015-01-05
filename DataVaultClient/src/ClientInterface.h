@@ -28,10 +28,10 @@ class ClientInterface
         void splitCommandToWords(string commandLine);
         inline bool checkFileExist (const std::string& name);
         unsigned int checkFilenamesCorectness();
+
         bool interpretCommand(string commandLine);
         void followTaskOnServer(Action action);
-        void processResponseUPLOAD(Response* response, Message& message);
-        void processResponseDOWNLOAD(Response* response, Message& message);
-        inline void showHelp();
+        void processResponse(Action action, Response* response, Message& message);
         void connect();
+        inline void showHelp();
 };

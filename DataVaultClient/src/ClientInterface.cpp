@@ -270,7 +270,7 @@ unsigned int ClientInterface::checkFilenamesCorectness()
         }
         if (!checkFileExist(command[i])) // jeśli przetwarzany plik nie istnieje
         {
-            cout << "# BŁĄD: Nie można odnaleźć pliku o nazwie \"" << command[i] << "\"!" << endl;
+            cout << "# BŁĄD: Nie można odnaleźć pliku o nazwie \"" << command[i] << "\"!\n";
             command.erase(command.begin() + i);
             incorrect++;
             i--;
@@ -308,14 +308,7 @@ void ClientInterface::followTaskOnServer(Action action)
             Message message(action, command);
             Response* response = client.sendMessage(message);
 
-            if (action == UPLOAD)
-            {
-                processResponseUPLOAD(response, message);
-            }
-            else if (action == DOWNLOAD)
-            {
-                processResponseDOWNLOAD(response, message);
-            }
+            processResponse(action, response, message);
 
             delete response;
         }
@@ -327,27 +320,93 @@ void ClientInterface::followTaskOnServer(Action action)
 }
 
 /**
- *  Przetwarzanie akcji UPLOAD.
+ *  Przetwarzanie odpowiedzi z serwera (response).
  */
-void ClientInterface::processResponseUPLOAD(Response* response, Message& message)
+void ClientInterface::processResponse(Action action, Response* response, Message& message)
 {
     switch (response->getStatus())
     {
         case OK:
         {
-            bool result;
-            for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+            switch (action)
             {
-                if (!checkFileExist(message.getParameters()[i])) // jeśli przetwarzany plik nie istnieje
+                case REGISTER:
                 {
-                    cout << "# BŁĄD: Nie można odnaleźć pliku '" << message.getParameters()[i] << "'!" << endl;
+                    cout << "Rejestracja zakończona sukcesem. Możesz teraz zalogować się używając polecenia login.\n";
                     break;
                 }
-                cout << "Przesyłanie pliku \"" << message.getParameters()[i] << "\"..." << endl;
-                result = client.sendFile(message.getParameters()[i], i != 0);
-                if(!result)
+                case LOGIN:
                 {
-                    cout << "# BŁĄD: Nie udało się wysłać pliku na serwer!" << endl;
+                    cout << "Poprawnie zalogowano do serwera " << ".\n";
+                    break;
+                }
+                case LOGOUT:
+                {
+                    cout << "Wylogowano z serwera.\n";
+                    break;
+                }
+                case UNREGISTER:
+                {
+                    cout << "Nastąpiło poprawne wyrejestrowanie użytkownika z bazy danych serwera. Przechowywane pliki zostały nieodwracalnie usunięte.\n";
+                    break;
+                }
+                case LIST:
+                {
+                    // tu trzeba będzie wylistować ładnie
+                    break;
+                }
+                case UPLOAD:
+                {
+                    bool result;
+                    for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+                    {
+                        if (!checkFileExist(message.getParameters()[i])) // jeśli przetwarzany plik nie istnieje
+                        {
+                            break;
+                        }
+                        cout << "Przesyłanie pliku \"" << message.getParameters()[i] << "\"...\n";
+                        result = client.sendFile(message.getParameters()[i], i != 0);
+                        if(!result)
+                        {
+                            cout << "# BŁĄD: Nie udało się wysłać pliku na serwer!\n";
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case DOWNLOAD:
+                {
+                    bool result;
+                    for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+                    {
+                        cout << "Pobieranie pliku " << message.getParameters()[i] << "...\n";
+                        result = client.receiveFile(message.getParameters()[i], true);
+                        if (!result)
+                        {
+                            cout << "# BŁĄD: Nie udało się pobrać pliku!\n";
+                            break;
+                        }
+                    }
+                    break;
+                }
+                case REMOVE:
+                {
+                    cout << "Plik " << "[nazwa pliku]" << " został usunięty z serwera.\n";
+                    break;
+                }
+                case RENAME:
+                {
+                    cout << "Pomyślnie zmieniono nazwę pliku na serwera.\n";
+                    break;
+                }
+                case GIVE_ACCESS:
+                {
+                    cout << "Przyznano uprawnienia dostępu do pliku " << " dla użytkownika " << "[login]" << ".\n";
+                    break;
+                }
+                case REVOKE_ACCESS:
+                {
+                    cout << "Uprawnienia dostępu do tego pliku zostały cofnięte użytkownikowi " << "[login]" << ".n";
                     break;
                 }
             }
@@ -355,59 +414,43 @@ void ClientInterface::processResponseUPLOAD(Response* response, Message& message
         }
         case WRONG_SYNTAX: // co tu ma być? kiedy jest taki response?!
         {
-            cout << "# BŁĄD: Wrong SYNTAX error." << endl;
+            cout << "# BŁĄD: Wrong SYNTAX error.\n";
             break;
         }
         case FILE_EXISTS:
         {
-            cout << "Plik o podanej nazwie już istnieje na serwerze. " << endl;
-            break;
-        }
-        default:
-        {
-        }
-    }
-}
-
-/**
- *  Przetwarzanie akcji DOWNLOAD.
- */
-void ClientInterface::processResponseDOWNLOAD(Response* response, Message& message)
-{
-    switch (response->getStatus())
-    {
-        case OK:
-        {
-            bool result;
-            for (unsigned int i = 0; i < message.getParameters().size(); ++i)
-            {
-                cout << "Pobieranie pliku " << message.getParameters()[i] << endl;
-                result = client.receiveFile(message.getParameters()[i], true);
-                if (!result)
-                {
-                    cout << "# BŁĄD: Nie udało się pobrać pliku!" << endl;
-                    break;
-                }
-            }
-            break;
-        }
-        case WRONG_SYNTAX: // co tu ma być? kiedy jest taki response?!
-        {
-            cout << "# BŁĄD: Wrong SYNTAX error." << endl;
+            cout << "Plik o podanej nazwie istnieje już na serwerze.\n";
             break;
         }
         case NO_SUCH_FILE:
         {
-            cout << "Plik o podanej nazwie nie istnieje na serwerze. " << endl;
+            cout << "Plik o podanej nazwie nie istnieje na serwerze.\n";
             break;
         }
         case ACCESS_DENIED:
         {
-            cout << "Nie masz dostępu do tego pliku." << endl;
+            cout << "Nie masz dostępu do tego pliku.\n";
             break;
         }
-        default:
+        case INCORRECT_LOGIN:
         {
+            cout << "# BŁĄD: Podana nazwa użytkownika nie istnieje!\n";
+            break;
+        }
+        case INCORRECT_PASSWORD:
+        {
+            cout << "# BŁAD: Podane hasło jest niepoprawne!\n";
+            break;
+        }
+        case USERNAME_USED:
+        {
+            cout << "Wybrana nazwa użytkownika jest już zajęta.\n";
+            break;
+        }
+        case NOT_IMPLEMENTED:
+        {
+            cout << "[funkcja jeszcze nie zaimplementowana na serwerze]\n";
+            break;
         }
     }
 }
@@ -419,7 +462,7 @@ void ClientInterface::connect()
 {
     if (client.isValidParameters())
     {
-        cout << "\nNawiązywanie połączenia..." << endl;
+        cout << "\nNawiązywanie połączenia...\n";
         if (client.connect())
         {
             cout << "Połączono z serwerem.\n";
