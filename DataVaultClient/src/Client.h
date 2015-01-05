@@ -29,6 +29,7 @@ class Client
 {
     private:
         ClientStore clientStore;
+        FileTransferManager fileTransferManager;
 
         string host;
         int messagePort;
@@ -46,7 +47,6 @@ class Client
         boost::asio::ip::tcp::socket socket;
         boost::asio::ip::tcp::endpoint endpoint;
 
-        FileTransferManager fileTransferManager;
 
     public:
         Client();

@@ -12,7 +12,7 @@ FileMap::~FileMap()
 
 }
 
-vector<string> FileMap::getFilelist()
+vector<string>& FileMap::getFilelist()
 {
     return files;
 }
@@ -73,4 +73,16 @@ int FileMap::rename(string oldname, string newname)
     }
     // jesli nie ma takiego pliku
     return -2;
+}
+
+bool FileMap::exists(string filename){
+    for(vector<string>::iterator it = files.begin(); it != files.end(); ++it)
+    {
+        // jeśli znaleziono plik o szukanej nazwie
+        if(*it == filename)
+        {
+            return true;
+        }
+    }
+    return false;
 }

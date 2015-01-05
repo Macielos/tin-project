@@ -264,33 +264,36 @@ void ClientInterface::followTaskOnServer(Action action)
             Response* response = client.sendMessage(message);
             cout << "Odpowiedź: " << response->toString() << endl;
 
-            bool result;
-            if (action == UPLOAD)
+            if(response->getStatus()==OK)
             {
-                for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+                bool result;
+                if (action == UPLOAD)
                 {
-                    cout << "Przesyłanie pliku " << message.getParameters()[i] << endl;
-                    result = client.sendFile(message.getParameters()[i], i != 0);
-                    if(!result)
+                    for (unsigned int i = 0; i < message.getParameters().size(); ++i)
                     {
-                        cout << "# BŁĄD: Nie udało się wysłać pliku!" << endl;
-                        break;
+                        cout << "Przesyłanie pliku " << message.getParameters()[i] << endl;
+                        result = client.sendFile(message.getParameters()[i], i != 0);
+                        if(!result)
+                        {
+                            cout << "# BŁĄD: Nie udało się wysłać pliku!" << endl;
+                            break;
+                        }
+                        cout << "Plik został pomyślnie załadowany na serwer." << endl;
                     }
-                    cout << "Plik został pomyślnie załadowany na serwer." << endl;
                 }
-            }
-            else if (action == DOWNLOAD)
-            {
-                for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+                else if (action == DOWNLOAD)
                 {
-                    cout << "Pobieranie pliku " << message.getParameters()[i] << endl;
-                    result = client.receiveFile(message.getParameters()[i], true);
-                    if (!result)
+                    for (unsigned int i = 0; i < message.getParameters().size(); ++i)
                     {
-                        cout << "# BŁĄD: Nie udało się pobrać pliku!" << endl;
-                        break;
+                        cout << "Pobieranie pliku " << message.getParameters()[i] << endl;
+                        result = client.receiveFile(message.getParameters()[i], true);
+                        if (!result)
+                        {
+                            cout << "# BŁĄD: Nie udało się pobrać pliku!" << endl;
+                            break;
+                        }
+                        cout << "Plik został pomyślnie pobrany z serwera." << endl;
                     }
-                    cout << "Plik został pomyślnie pobrany z serwera." << endl;
                 }
             }
             delete response;

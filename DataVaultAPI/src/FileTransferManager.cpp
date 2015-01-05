@@ -66,7 +66,7 @@ bool FileTransferManager::sendFile(string destination, string filename, bool not
                 return false;;
             }
         }
-        cout << "Ukończono przesyłanie " << filename << "." << endl;
+        cout << "Przesłano plik " << filename << "." << endl;
         dataSocket.close();
         return true;
     }

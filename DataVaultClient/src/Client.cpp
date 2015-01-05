@@ -6,7 +6,7 @@
  */
 #include "Client.h"
 
-Client::Client() : socket(ioService), fileTransferManager(ioService)
+Client::Client(): fileTransferManager(ioService), socket(ioService)
 {
     host = "";
     messagePort = 0;
@@ -166,7 +166,6 @@ Response* Client::sendMessage(Message& message)
     message.setUserId(userId);
     message.setSource(socket.remote_endpoint().address().to_string());
 
-    cout << "Wysyłanie polecenia od: " << message.getUserId() << endl;
     string serializedMessage = serialize(message);
     write(socket, boost::asio::buffer(serializedMessage), error);
     socket.read_some(boost::asio::buffer(responseBuffer), error);

@@ -8,6 +8,7 @@
 #include <iostream>
 #include <sstream>
 #include <string>
+#include <cstdio>
 
 #include "ServerStore.h"
 #include "../DataVaultAPI/src/FileTransferManager.h"
@@ -38,6 +39,7 @@ class Server
         void handleMessage(tcp::socket* socket);
         string createResponse(Status status);
         string createResponse(Status status, string description);
+        string createResponse(Status status, vector<string>& parameters);
         template<typename T> string serialize(T& t);
         template<typename T> void deserialize(T& t, string serializedData);
 };

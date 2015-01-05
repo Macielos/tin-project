@@ -50,10 +50,14 @@
 		<Unit filename="../DataVaultAPI/src/Message.h" />
 		<Unit filename="../DataVaultAPI/src/Response.cpp" />
 		<Unit filename="../DataVaultAPI/src/Response.h" />
+		<Unit filename="src/FileMap.cpp" />
+		<Unit filename="src/FileMap.h" />
 		<Unit filename="src/Server.cpp" />
 		<Unit filename="src/Server.h" />
 		<Unit filename="src/ServerStore.cpp" />
 		<Unit filename="src/ServerStore.h" />
+		<Unit filename="src/User.cpp" />
+		<Unit filename="src/User.h" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />

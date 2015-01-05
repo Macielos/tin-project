@@ -25,7 +25,7 @@ void User::setUsername(string username)
     this->username = username;
 }
 
-vector<string> User::getFilelist()
+vector<string>& User::getFilelist()
 {
     return filemap.getFilelist();
 }
@@ -45,4 +45,6 @@ int User::rename(string oldname, string newname)
     return filemap.rename(oldname, newname);
 }
 
-
+bool User::fileExists(string filename){
+    return filemap.exists(filename);
+}

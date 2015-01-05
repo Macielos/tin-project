@@ -10,7 +10,7 @@ using namespace std;
 /**
  *  Status wysyłany zwrotnie do klienta po obsłużeniu żądania
  */
-enum Status {OK, IO_ERROR, WRONG_SYNTAX, NO_SUCH_FILE, ACCESS_DENIED, NOT_IMPLEMENTED};
+enum Status {OK, WRONG_SYNTAX, NO_SUCH_FILE, FILE_EXISTS, ACCESS_DENIED, NOT_IMPLEMENTED};
 
 class Response
 {
@@ -28,6 +28,8 @@ class Response
 
     public:
         Response(Status status, string description, vector<string> parameters);
+        Response(Status status, string description);
+        Response(Status status);
         Response();
         ~Response();
 

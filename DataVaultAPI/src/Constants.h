@@ -1,3 +1,5 @@
+using namespace std;
+
 /**
  *  Tyle razy metoda sendNotification() będzie próbowac połączyć się z drugą, aby wysłąć jej powiadomienie,
  *  że można przesyłać kolejny plik

@@ -52,10 +52,41 @@ void Server::handleMessage(tcp::socket* socket){
     cout<<message.toString()<<endl;
 
     bool result;
+    string response;
+    vector<string> mismatchingParameters;
+
     switch(message.getAction()){
+        case REGISTER: case LOGIN: case LOGOUT: case UNREGISTER:
+            //TODO
+            response = createResponse(NOT_IMPLEMENTED);
+            socket->write_some(boost::asio::buffer(response), error);
+            break;
+        case LIST:
+        {
+            //jeśli podano parametry - błąd
+            if(message.getParameters().size()!=0){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                //break;
+            }
+
+            vector<string>& filenames = serverStore.list(message.getUserId());
+            response = createResponse(OK, filenames);
+            socket->write_some(boost::asio::buffer(response), error);
+            break;
+        }
         case UPLOAD:
+            //jeśli nie podano parametrów - błąd
+            if(message.getParameters().size()==0){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+
+            //żądanie poprawne, rozpocznij transfer
             dataPortAccessMutex.lock();
-            socket->write_some(boost::asio::buffer(createResponse(OK)), error);
+            response = createResponse(OK);
+            socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" przesyła plik "<<message.getParameters()[i]<<endl;
                 result = fileTransferManager.receiveFile(message.getSource(), message.getParameters()[i], i!=0);
@@ -63,13 +94,36 @@ void Server::handleMessage(tcp::socket* socket){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
                 }
+                serverStore.add(message.getUserId(), message.getParameters()[i]);
                 cout<<"Gotowe."<<endl;
             }
             dataPortAccessMutex.unlock();
             break;
+
         case DOWNLOAD:
+            //jeśli nie podano parametrów - błąd
+            if(message.getParameters().size()==0){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+            //jeśli któreś z podanych plików nie istnieją - błąd.
+            //zwróć nazwy nieistniejących plików.
+            for(unsigned int i=0; i<message.getParameters().size(); ++i){
+                if(!serverStore.fileExists(message.getUserId(), message.getParameters()[i])){
+                    mismatchingParameters.push_back(message.getParameters()[i]);
+                }
+            }
+            if(mismatchingParameters.size()>0){
+                response = createResponse(NO_SUCH_FILE, mismatchingParameters);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+
+            //żądanie poprawne, rozpocznij transfer
             dataPortAccessMutex.lock();
-            socket->write_some(boost::asio::buffer(createResponse(OK)), error);
+            response = createResponse(OK);
+            socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" pobiera plik "<<message.getParameters()[i]<<endl;
                 result = fileTransferManager.sendFile(message.getSource(), message.getParameters()[i], true);
@@ -81,7 +135,61 @@ void Server::handleMessage(tcp::socket* socket){
             }
             dataPortAccessMutex.unlock();
             break;
-        default:
+
+        case REMOVE:
+            //jeśli nie podano parametrów - błąd
+            if(message.getParameters().size()==0){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+
+            //usuń pliki, jeśli istnieją, zapisz nazwy tych, które nie istnieją
+            int result;
+            for(unsigned int i=0; i<message.getParameters().size(); ++i){
+                result = serverStore.remove(message.getUserId(), message.getParameters()[i]);
+                if(result==0){
+                    remove(message.getParameters()[i].c_str());
+                }else{
+                    mismatchingParameters.push_back(message.getParameters()[i]);
+                }
+            }
+
+            //wyślij zwrotny komunikat
+            if(mismatchingParameters.size()>0){
+                response = createResponse(NO_SUCH_FILE, mismatchingParameters);
+            }else{
+                response = createResponse(OK);
+            }
+            socket->write_some(boost::asio::buffer(response), error);
+            break;
+
+        case RENAME:
+            //jeśli liczba parametrów różna od 2 - błąd
+            if(message.getParameters().size()!=2){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+            result = serverStore.rename(message.getUserId(),
+                message.getParameters()[0], message.getParameters()[1]);
+            switch(result){
+            case 0:
+                rename(message.getParameters()[0].c_str(), message.getParameters()[1].c_str());
+                response = createResponse(OK);
+                break;
+            case -2:
+                mismatchingParameters.push_back(message.getParameters()[0]);
+                response = createResponse(NO_SUCH_FILE, mismatchingParameters);
+                break;
+            case -3:
+                mismatchingParameters.push_back(message.getParameters()[1]);
+                response = createResponse(FILE_EXISTS, mismatchingParameters);
+                break;
+            }
+            socket->write_some(boost::asio::buffer(response), error);
+            break;
+        case GIVE_ACCESS: case REVOKE_ACCESS:
             socket->write_some(boost::asio::buffer(createResponse(NOT_IMPLEMENTED)), error);
     }
     socket->close();
@@ -89,12 +197,20 @@ void Server::handleMessage(tcp::socket* socket){
 }
 
 string Server::createResponse(Status status){
-    return createResponse(status, "");
+    Response response(status);
+    cout<<"Response: "<<response.toString()<<endl;
+    return serialize(response);
 }
 
 string Server::createResponse(Status status, string description){
-    vector<string> temp;
-    Response response(status, description, temp);
+    Response response(status, description);
+    cout<<"Response: "<<response.toString()<<endl;
+    return serialize(response);
+}
+
+string Server::createResponse(Status status, vector<string>& parameters){
+    Response response(status, "", parameters);
+    cout<<"Response: "<<response.toString()<<endl;
     return serialize(response);
 }
 

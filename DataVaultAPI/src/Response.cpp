@@ -6,6 +6,18 @@ Response::Response(Status status, string description, vector<string> parameters)
 
 }
 
+Response::Response(Status status, string description):
+    status(status), description(description)
+{
+
+}
+
+Response::Response(Status status):
+    status(status), description("")
+{
+
+}
+
 Response::Response()
 {
 

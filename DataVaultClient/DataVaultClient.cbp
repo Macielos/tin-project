@@ -41,16 +41,18 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="../DataVaultAPI/src/FileTransferManager.cpp" />
+		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
 		<Unit filename="../DataVaultAPI/src/Message.h" />
+		<Unit filename="../DataVaultAPI/src/Response.cpp" />
+		<Unit filename="../DataVaultAPI/src/Response.h" />
 		<Unit filename="src/Client.cpp" />
 		<Unit filename="src/Client.h" />
 		<Unit filename="src/ClientInterface.cpp" />
 		<Unit filename="src/ClientInterface.h" />
 		<Unit filename="src/ClientStore.cpp" />
 		<Unit filename="src/ClientStore.h" />
-		<Unit filename="src/FileTransferManager.cpp" />
-		<Unit filename="src/FileTransferManager.h" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />
