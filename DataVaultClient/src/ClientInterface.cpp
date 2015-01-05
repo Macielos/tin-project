@@ -94,8 +94,9 @@ bool ClientInterface::getCommand()
  */
 bool ClientInterface::interpretCommand(string commandLine)
 {
-    splitCommandToWords(commandLine);
-    if(command.size()==0){
+    splitCommandToWords(commandLine); // dzielenie komendy na wyrazy
+    if (command.size() == 0) // jeśli pusta komenda -> nic nie rób
+    {
         return true;
     }
 
@@ -138,6 +139,11 @@ bool ClientInterface::interpretCommand(string commandLine)
         }
         // ...DATA_PORT
         else if ( (c_t == "data_port") || ( c_t == "portd") || ( c_t == "dport") || ( c_t == "dataport") )
+        {
+            changeParameter(DATA_PORT, command[1]);
+        }
+        // ...NOTIFICATION_PORT
+        else if ( (c_t == "notification_port") || ( c_t == "portn") || ( c_t == "nport") || ( c_t == "notificationport") )
         {
             changeParameter(DATA_PORT, command[1]);
         }
@@ -216,7 +222,7 @@ bool ClientInterface::interpretCommand(string commandLine)
         }
         else
         {
-            cout << "# BŁĄD: Nie rozpoznano polecenia!\n";
+            cout << "# BŁĄD: Nie rozpoznano polecenia! Czy chodziło ci o '" << c << " access'?\n";
         }
     }
     else
@@ -249,7 +255,7 @@ void ClientInterface::followTaskOnServer(Action action)
                 && action != LOGIN
                 && action != UNREGISTER )
         {
-            cout << "# BŁĄD: Nie jesteś zalogowany, aby móc wykonać tę akcję! Użyj polecenia login [login] [hasło]\n";
+            cout << "# BŁĄD: Nie jesteś zalogowany aby móc wykonać tę akcję! Użyj polecenia login [nazwa użytkownika] [hasło]\n";
         }
         else
         {
@@ -259,25 +265,32 @@ void ClientInterface::followTaskOnServer(Action action)
             cout << "Odpowiedź: " << response->toString() << endl;
 
             bool result;
-            if(action == UPLOAD){
-                for(unsigned int i=0; i<message.getParameters().size(); ++i){
-                    cout << "Przesyłanie pliku "<<message.getParameters()[i] << endl;
-                    result = client.sendFile(message.getParameters()[i], i!=0);
-                    if(!result){
-                        cout << "Nie przesłano pliku" << endl;
+            if (action == UPLOAD)
+            {
+                for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+                {
+                    cout << "Przesyłanie pliku " << message.getParameters()[i] << endl;
+                    result = client.sendFile(message.getParameters()[i], i != 0);
+                    if(!result)
+                    {
+                        cout << "# BŁĄD: Nie udało się wysłać pliku!" << endl;
                         break;
                     }
-                    cout << "Gotowe." << endl;
+                    cout << "Plik został pomyślnie załadowany na serwer." << endl;
                 }
-            } else if (action == DOWNLOAD){
-                for(unsigned int i=0; i<message.getParameters().size(); ++i){
-                    cout << "Pobieranie pliku "<<message.getParameters()[i] << endl;
+            }
+            else if (action == DOWNLOAD)
+            {
+                for (unsigned int i = 0; i < message.getParameters().size(); ++i)
+                {
+                    cout << "Pobieranie pliku " << message.getParameters()[i] << endl;
                     result = client.receiveFile(message.getParameters()[i], true);
-                    if(!result){
-                        cout << "Nie przesłano pliku" << endl;
+                    if (!result)
+                    {
+                        cout << "# BŁĄD: Nie udało się pobrać pliku!" << endl;
                         break;
                     }
-                    cout << "Gotowe." << endl;
+                    cout << "Plik został pomyślnie pobrany z serwera." << endl;
                 }
             }
             delete response;
@@ -314,7 +327,7 @@ void ClientInterface::connect()
  void ClientInterface::showHelp()
  {
     cout << "\n\n\n\t\tDATA VAULT\n\n"
-     << "  set          - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd] [wartość]\n"
+     << "  set          - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd|portn] [wartość]\n"
      << "  connect      - ustanawia połączenie z serwerem\n\t\t\tbez parametrów\n"
      << "  login        - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\t\tskładnia: login [nazwa użytkownika] [hasło]\n"
      << "  logout       - wylogowuje użytkownika z serwera\n\t\t\tbez parametrów\n"
