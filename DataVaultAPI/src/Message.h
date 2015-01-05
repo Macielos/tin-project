@@ -5,12 +5,12 @@
 #include <boost/serialization/string.hpp>
 #include <boost/serialization/vector.hpp>
 
-#include "Constants.h"
-
-#pragma once
-
 using namespace std;
-using namespace boost::archive;
+
+/**
+ *  Działanie zlecane serwerowi przez klienta
+ */
+enum Action {REGISTER, LOGIN, LOGOUT, UNREGISTER, LIST, UPLOAD, DOWNLOAD, REMOVE, RENAME, GIVE_ACCESS, REVOKE_ACCESS};
 
 class Message
 {
@@ -30,13 +30,20 @@ class Message
 
     public:
         Message(string userId, string source, Action action, vector<string> parameters);
-        Message(Message& message);
-        Message(vector<string> parameters);
+        Message(Action action, vector<string> parameters);
+        Message();
         ~Message();
+
         string getUserId();
         string getSource();
         Action getAction();
         vector<string>& getParameters();
+
+        void setUserId(string userId);
+        void setSource(string source);
+        void setAction(Action action);
+        void setParameters(vector<string> parameters);
+
         string toString();
 
 };

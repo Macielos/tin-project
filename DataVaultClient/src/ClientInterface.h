@@ -1,14 +1,33 @@
+/**
+ *  ### ClientInterface.h ###
+ *
+ *      Nagłówek klasy ClientInterface.
+ *
+ *  Klasa ClientInterface odpowiada za interakcje z użytkownikiem.
+ *
+ */
 #include "Client.h"
+#include <algorithm>
+#include <boost/algorithm/string/split.hpp>
+#include <boost/algorithm/string/classification.hpp>
+
+using std::vector;
+
+enum ConnectionParameter {HOST, MESSAGE_PORT, DATA_PORT, NOTIFICATION_PORT};
 
 class ClientInterface
 {
-    Client client;
-
+        Client client;          // klient do zestawienia połączenia z serwerem
+        vector<string> command; // polecenie (komenda) wpisana przez użytkownika podzielona na wyrazy
     public:
         ClientInterface();
         ~ClientInterface();
-        void init(string host, short messagePort, short dataPort, short notificationPort);
-        string send(Message& message);
-        void sendFile(string filename, bool notify);
-        void receiveFile(string filename, bool notify);
+        void changeParameter(ConnectionParameter param, string value);
+        bool getCommand();
+    private:
+        void splitCommandToWords(string commandLine);
+        bool interpretCommand(string commandLine);
+        void followTaskOnServer(Action action);
+        void showHelp();
+        void connect();
 };

@@ -1,14 +1,16 @@
 #include "Message.h"
 
-Message::Message(string userId, string source, Action action, vector<string> parameters): userId(userId), source(source), action(action), parameters(parameters)
+Message::Message(string userId, string source, Action action, vector<string> parameters):
+    userId(userId), source(source), action(action), parameters(parameters)
 {
 }
 
-Message::Message(Message& message): userId(message.getUserId()), source(message.getSource()), action(message.getAction()), parameters(message.getParameters())
+Message::Message(Action action, vector<string> parameters):
+    action(action), parameters(parameters)
 {
 }
 
-Message::Message(vector<string> parameters): parameters(parameters)
+Message::Message()
 {
 }
 
@@ -30,6 +32,22 @@ Action Message::getAction(){
 
 vector<string>& Message::getParameters(){
     return parameters;
+}
+
+void Message::setUserId(string userId){
+    this->userId=userId;
+}
+
+void Message::setSource(string source){
+    this->source=source;
+}
+
+void Message::setAction(Action action){
+    this->action=action;
+}
+
+void Message::setParameters(vector<string> parameters){
+    this->parameters=parameters;
 }
 
 string Message::toString(){

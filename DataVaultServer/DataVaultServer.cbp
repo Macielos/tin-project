@@ -48,6 +48,8 @@
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
 		<Unit filename="../DataVaultAPI/src/Message.h" />
+		<Unit filename="../DataVaultAPI/src/Response.cpp" />
+		<Unit filename="../DataVaultAPI/src/Response.h" />
 		<Unit filename="src/Server.cpp" />
 		<Unit filename="src/Server.h" />
 		<Unit filename="src/ServerStore.cpp" />
