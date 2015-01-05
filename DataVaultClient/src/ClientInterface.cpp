@@ -23,57 +23,57 @@ void ClientInterface::changeParameter(ConnectionParameter param, string value)
 {
     switch (param)
     {
-        case HOST:
+    case HOST:
+    {
+        if (client.setHost(value))
         {
-            if (client.setHost(value))
-            {
-                cout << "Wczytano parametr: host: " << value << "\n";
-            }
-            else
-            {
-                cout << "# BŁĄD: Niepoprawna nazwa hosta!\n";
-            }
-            break;
+            cout << "Wczytano parametr: host: " << value << "\n";
         }
-        case MESSAGE_PORT:
+        else
         {
-            int messagePort = atoi(value.c_str());
-            if (client.setMessagePort(messagePort))
-            {
-                cout << "Wczytano parametr: port poleceń: " << messagePort << "\n";
-            }
-            else
-            {
-                cout << "# BŁĄD: Niepoprawny numer portu poleceń!\n";
-            }
-            break;
+            cout << "# BŁĄD: Niepoprawna nazwa hosta!\n";
         }
-        case DATA_PORT:
+        break;
+    }
+    case MESSAGE_PORT:
+    {
+        int messagePort = atoi(value.c_str());
+        if (client.setMessagePort(messagePort))
         {
-            int dataPort = atoi(value.c_str());
-            if (client.setDataPort(dataPort))
-            {
-                cout << "Wczytano parametr: port danych: " << dataPort << "\n";
-            }
-            else
-            {
-                cout << "# BŁĄD: Niepoprawny numer portu danych!\n";
-            }
-            break;
+            cout << "Wczytano parametr: port poleceń: " << messagePort << "\n";
         }
-        case NOTIFICATION_PORT:
+        else
         {
-            int notificationPort = atoi(value.c_str());
-            if (client.setNotificationPort(notificationPort))
-            {
-                cout << "Wczytano parametr: port powiadomień: " << notificationPort << "\n";
-            }
-            else
-            {
-                cout << "# BŁĄD: Niepoprawny numer portu powiadomień!\n";
-            }
-            break;
+            cout << "# BŁĄD: Niepoprawny numer portu poleceń!\n";
         }
+        break;
+    }
+    case DATA_PORT:
+    {
+        int dataPort = atoi(value.c_str());
+        if (client.setDataPort(dataPort))
+        {
+            cout << "Wczytano parametr: port danych: " << dataPort << "\n";
+        }
+        else
+        {
+            cout << "# BŁĄD: Niepoprawny numer portu danych!\n";
+        }
+        break;
+    }
+    case NOTIFICATION_PORT:
+    {
+        int notificationPort = atoi(value.c_str());
+        if (client.setNotificationPort(notificationPort))
+        {
+            cout << "Wczytano parametr: port powiadomień: " << notificationPort << "\n";
+        }
+        else
+        {
+            cout << "# BŁĄD: Niepoprawny numer portu powiadomień!\n";
+        }
+        break;
+    }
     }
 }
 
@@ -95,10 +95,6 @@ bool ClientInterface::getCommand()
 bool ClientInterface::interpretCommand(string commandLine)
 {
     splitCommandToWords(commandLine); // dzielenie komendy na wyrazy
-    if (command.size() == 0) // jeśli pusta komenda -> nic nie rób
-    {
-        return true;
-    }
 
     string c = command[0]; // pierwsze słowo - jakie działanie
     transform(c.begin(), c.end(), c.begin(), ::tolower); // wszystkie litery małe
@@ -107,8 +103,13 @@ bool ClientInterface::interpretCommand(string commandLine)
     /*
         Komendy związane z pracą samego programu.
     */
+    // pusta komenda
+    if (c.length() == 0)
+    {
+        return true;
+    }
     // EXIT
-    if ( (c == "quit") || (c == "exit") )
+    else if ( (c == "quit") || (c == "exit") )
     {
         return false;
     }
@@ -243,6 +244,42 @@ void ClientInterface::splitCommandToWords(string commandLine)
 }
 
 /**
+ *  Sprawdza istnienie pliku na dysku.
+ */
+inline bool ClientInterface::checkFileExist (const std::string& name)
+{
+    struct stat buffer;
+    return (stat (name.c_str(), &buffer) == 0);
+}
+
+/**
+ *  Sprawdza czy nazwy plików (jako parametry w wektorze command) są poprawne (istnieją).
+ *  Kiedy plik nie będzie istniał wypisze komunikat i usunie nazwę z wektora i będzie kontynuował sprawdzanie.
+ *  Zwraca ilość niepoprawnych nazw.
+ */
+unsigned int ClientInterface::checkFilenamesCorectness()
+{
+    unsigned int incorrect = 0;
+    for (unsigned int i = 0; i < command.size(); i++) // pętla po nazwach plików
+    {
+        if (command[i].length() == 0)
+        {
+            command.erase(command.begin() + i);
+            i--;
+            continue;
+        }
+        if (!checkFileExist(command[i])) // jeśli przetwarzany plik nie istnieje
+        {
+            cout << "# BŁĄD: Nie można odnaleźć pliku o nazwie \"" << command[i] << "\"!" << endl;
+            command.erase(command.begin() + i);
+            incorrect++;
+            i--;
+        }
+    }
+    return incorrect;
+}
+
+/**
  *  Odpowiada za przygotowanie i wysłanie żądania do serwera.
  */
 void ClientInterface::followTaskOnServer(Action action)
@@ -259,23 +296,32 @@ void ClientInterface::followTaskOnServer(Action action)
         }
         else
         {
+            checkFilenamesCorectness();
+            if (command.size() == 0)
+            {
+                return;
+            }
+
             Message message(action, command);
-
             Response* response = client.sendMessage(message);
-            cout << "Odpowiedź: " << response->toString() << endl;
 
-            if(response->getStatus()==OK)
+            if (response->getStatus() == OK)
             {
                 bool result;
                 if (action == UPLOAD)
                 {
                     for (unsigned int i = 0; i < message.getParameters().size(); ++i)
                     {
-                        cout << "Przesyłanie pliku " << message.getParameters()[i] << endl;
+                        if (!checkFileExist(message.getParameters()[i])) // jeśli przetwarzany plik nie istnieje
+                        {
+                            cout << "# BŁĄD: Nie można odnaleźć pliku '" << message.getParameters()[i] << "'!" << endl;
+                            break;
+                        }
+                        cout << "Przesyłanie pliku " << message.getParameters()[i] << "..." << endl;
                         result = client.sendFile(message.getParameters()[i], i != 0);
                         if(!result)
                         {
-                            cout << "# BŁĄD: Nie udało się wysłać pliku!" << endl;
+                            cout << "# BŁĄD: Nie udało się wysłać pliku na serwer!" << endl;
                             break;
                         }
                         cout << "Plik został pomyślnie załadowany na serwer." << endl;
@@ -327,23 +373,23 @@ void ClientInterface::connect()
 /**
  *  Wypisuje pomoc dotyczącą poleceń programu.
  */
- void ClientInterface::showHelp()
- {
+inline void ClientInterface::showHelp()
+{
     cout << "\n\n\n\t\tDATA VAULT\n\n"
-     << "  set          - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd|portn] [wartość]\n"
-     << "  connect      - ustanawia połączenie z serwerem\n\t\t\tbez parametrów\n"
-     << "  login        - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\t\tskładnia: login [nazwa użytkownika] [hasło]\n"
-     << "  logout       - wylogowuje użytkownika z serwera\n\t\t\tbez parametrów\n"
-     << "  register     - rejestruje użytkownika na serwerze przy użyciu loginu i hasła\n\t\t\tskładnia: register [nazwa użytkownika] [hasło] [powtórz hasło]\n"
-     << "  unregister   - wyrejestrowuje użytkownika z serwera\n\t\t\tskładnia: unregister [nazwa użytkownika] [hasło]\n"
-     << "  list         - pokazuje informacje o plikach\n\t\t\tskładnia: list [parametr]\n"
-     << "  upload       - wysyła plik z dysku lokalnego na serwer\n\t\t\tskładnia: upload [nazwa pliku(ścieżka względem programu)]\n"
-     << "  download     - pobiera plik z serwera na dysk lokalny\n\t\t\tskładnia: download [nazwa pliku na serwerze]\n"
-     << "  remove       - usuwa plik z serwera\n\t\t\tskładnia: remove [nazwa pliku]\n"
-     << "  rename       - zmienia nazwę pliku na serwerze\n\t\t\tskładnia: rename [nazwa pliku (stara)] [nazwa pliku (nowa)]\n"
-     << "  give access  - przyznaje dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: give access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
-     << "  revoke access- odbiera dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: revoke access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
-     << "  help         - pokazuje tę pomoc\n"
-     << "  exit/quit    - wchodzi z programu\n"
-     << endl;
- }
+         << "  set          - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd|portn] [wartość]\n"
+         << "  connect      - ustanawia połączenie z serwerem\n\t\t\tbez parametrów\n"
+         << "  login        - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\t\tskładnia: login [nazwa użytkownika] [hasło]\n"
+         << "  logout       - wylogowuje użytkownika z serwera\n\t\t\tbez parametrów\n"
+         << "  register     - rejestruje użytkownika na serwerze przy użyciu loginu i hasła\n\t\t\tskładnia: register [nazwa użytkownika] [hasło] [powtórz hasło]\n"
+         << "  unregister   - wyrejestrowuje użytkownika z serwera\n\t\t\tskładnia: unregister [nazwa użytkownika] [hasło]\n"
+         << "  list         - pokazuje informacje o plikach\n\t\t\tskładnia: list [parametr]\n"
+         << "  upload       - wysyła plik z dysku lokalnego na serwer\n\t\t\tskładnia: upload [nazwa pliku(ścieżka względem programu)]\n"
+         << "  download     - pobiera plik z serwera na dysk lokalny\n\t\t\tskładnia: download [nazwa pliku na serwerze]\n"
+         << "  remove       - usuwa plik z serwera\n\t\t\tskładnia: remove [nazwa pliku]\n"
+         << "  rename       - zmienia nazwę pliku na serwerze\n\t\t\tskładnia: rename [nazwa pliku (stara)] [nazwa pliku (nowa)]\n"
+         << "  give access  - przyznaje dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: give access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
+         << "  revoke access- odbiera dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: revoke access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
+         << "  help         - pokazuje tę pomoc\n"
+         << "  exit/quit    - wchodzi z programu\n"
+         << endl;
+}

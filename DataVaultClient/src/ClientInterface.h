@@ -26,8 +26,10 @@ class ClientInterface
         bool getCommand();
     private:
         void splitCommandToWords(string commandLine);
+        inline bool checkFileExist (const std::string& name);
+        unsigned int checkFilenamesCorectness();
         bool interpretCommand(string commandLine);
         void followTaskOnServer(Action action);
-        void showHelp();
+        inline void showHelp();
         void connect();
 };
