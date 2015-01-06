@@ -83,6 +83,40 @@ int ServerStore::registerUser(string username, string hash)
 
 }
 
+int ServerStore::unregisterUser(string username, string hash)
+{
+    // Przejscie po liscie wszystkich userow
+    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
+    {
+        // jeśli znaleziono taki username
+        if(it->getUsername() == username)
+        {
+            if (it->getHash() == hash)
+            {
+                /*
+
+
+                !!! WAŻNE !!!
+
+                TUTAJ (przed usunięciem usera)
+
+                wstawić usuwanie wszystkich jego plików
+                wstawić usuwanie jesgo katalogu
+
+
+                */
+                users.erase(it);
+                return 0;
+            }
+            else
+            {
+                return -2;
+            }
+        }
+    }
+    return -1;
+}
+
 bool ServerStore::fileExists(string username, string filename)
 {
     for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)

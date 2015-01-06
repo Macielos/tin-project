@@ -88,17 +88,51 @@ void Server::handleMessage(tcp::socket* socket)
         }
         case LOGIN:
         {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                //TODO
+                response = createResponse(NOT_IMPLEMENTED);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
             break;
         }
         case LOGOUT:
         {
+            //TODO
+            response = createResponse(NOT_IMPLEMENTED);
+            socket->write_some(boost::asio::buffer(response), error);
             break;
         }
         case UNREGISTER:
         {
-            //TODO
-            response = createResponse(NOT_IMPLEMENTED);
-            socket->write_some(boost::asio::buffer(response), error);
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // usuwamy użyszkodnika
+                result = serverStore.unregisterUser(message.getParameters()[0], message.getParameters()[1]);
+                switch (result)
+                {
+                    case 0: // użytkownik usunięty poprawnie
+                        response = createResponse(OK);
+                        break;
+                    case -1: // login błędny
+                        response = createResponse(INCORRECT_LOGIN);
+                        break;
+                    case -2: // hasło błędne
+                        response = createResponse(INCORRECT_PASSWORD);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
             break;
         }
         case LIST:
