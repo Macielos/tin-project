@@ -25,5 +25,4 @@ class User
         string hashPass;
         FileMap filemap;
 
-
 };

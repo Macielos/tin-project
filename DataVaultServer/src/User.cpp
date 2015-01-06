@@ -61,6 +61,7 @@ int User::rename(string oldname, string newname)
     return filemap.rename(oldname, newname);
 }
 
-bool User::fileExists(string filename){
+bool User::fileExists(string filename)
+{
     return filemap.exists(filename);
 }
