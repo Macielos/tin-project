@@ -21,6 +21,7 @@
 #include "../DataVaultAPI/src/FileTransferManager.h"
 #include "../DataVaultAPI/src/Message.h"
 #include "../DataVaultAPI/src/Response.h"
+#include "../DataVaultAPI/src/Md5.h"
 
 using namespace std;
 using boost::asio::ip::tcp;
