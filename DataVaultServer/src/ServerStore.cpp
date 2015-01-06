@@ -65,11 +65,65 @@ int ServerStore::rename(string username, string oldname, string newname)
     return -1;
 }
 
-bool ServerStore::fileExists(string username, string filename){
+int ServerStore::registerUser(string username, string hash)
+{
+    // Przejscie po liscie wszystkich userow
+    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
+    {
+        // jeśli znaleziono taki username
+        if(it->getUsername() == username)
+            return -1;
+    }
+    User user;
+    user.setUsername(username);
+    user.setHash(hash);
+    users.push_back(user);
+    return 0;
+    // jesli username nie ma w bazie (można rejestrować)
+
+}
+
+int ServerStore::unregisterUser(string username, string hash)
+{
+    // Przejscie po liscie wszystkich userow
+    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
+    {
+        // jeśli znaleziono taki username
+        if(it->getUsername() == username)
+        {
+            if (it->getHash() == hash)
+            {
+                /*
+
+
+                !!! WAŻNE !!!
+
+                TUTAJ (przed usunięciem usera)
+
+                wstawić usuwanie wszystkich jego plików
+                wstawić usuwanie jesgo katalogu
+
+
+                */
+                users.erase(it);
+                return 0;
+            }
+            else
+            {
+                return -2;
+            }
+        }
+    }
+    return -1;
+}
+
+bool ServerStore::fileExists(string username, string filename)
+{
     for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
     {
         // jeśli znaleziono usera
-        if(it->getUsername() == username){
+        if(it->getUsername() == username)
+        {
             return it->fileExists(filename);
         }
     }

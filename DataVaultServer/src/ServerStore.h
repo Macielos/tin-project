@@ -40,5 +40,18 @@ class ServerStore
         */
         int rename(string username, string oldname, string newname);
 
+        /*
+        zwraca 0 jak się udało
+        zwraca -1 jak username w użyciu
+        */
+        int registerUser(string username, string hash);
+
+        /*
+        zwraca 0 jak się udało
+        zwraca -1 jak brak usera
+        zwraca -2 jak błędny hash
+        */
+        int unregisterUser(string username, string hash);
+
         bool fileExists(string username, string filename);
 };

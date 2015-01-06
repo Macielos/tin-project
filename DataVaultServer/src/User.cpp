@@ -15,14 +15,30 @@ User::User(string username)
     this->username = username;
 }
 
+User::User(string username, string hash)
+{
+    this->username = username;
+    this->hashPass = hash;
+}
+
 string User::getUsername()
 {
     return this->username;
 }
 
+string User::getHash()
+{
+    return this->hashPass;
+}
+
 void User::setUsername(string username)
 {
     this->username = username;
+}
+
+void User::setHash(string hash)
+{
+    this->hashPass = hash;
 }
 
 vector<string>& User::getFilelist()
@@ -45,6 +61,7 @@ int User::rename(string oldname, string newname)
     return filemap.rename(oldname, newname);
 }
 
-bool User::fileExists(string filename){
+bool User::fileExists(string filename)
+{
     return filemap.exists(filename);
 }
