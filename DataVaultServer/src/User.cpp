@@ -38,7 +38,7 @@ void User::setUsername(string username)
 
 void User::setHash(string hash)
 {
-    this->hashPass = hashPass;
+    this->hashPass = hash;
 }
 
 vector<string>& User::getFilelist()
