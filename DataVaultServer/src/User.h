@@ -10,8 +10,11 @@ class User
         User();
         ~User();
         User(string username);
+        User(string username, string hash);
         string getUsername();
+        string getHash();
         void setUsername(string username);
+        void setHash(string hash);
         vector<string>& getFilelist();
         int add(string filename);
         int remove(string filename);
@@ -19,6 +22,7 @@ class User
         bool fileExists(string filename);
     private:
         string username;
+        string hashPass;
         FileMap filemap;
 
 

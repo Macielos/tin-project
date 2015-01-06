@@ -15,14 +15,30 @@ User::User(string username)
     this->username = username;
 }
 
+User::User(string username, string hash)
+{
+    this->username = username;
+    this->hashPass = hash;
+}
+
 string User::getUsername()
 {
     return this->username;
 }
 
+string User::getHash()
+{
+    return this->hashPass;
+}
+
 void User::setUsername(string username)
 {
     this->username = username;
+}
+
+void User::setHash(string hash)
+{
+    this->hashPass = hashPass;
 }
 
 vector<string>& User::getFilelist()
