@@ -279,7 +279,7 @@ unsigned int ClientInterface::checkFilenamesCorectness()
 }
 
 /**
- *  Sprawdza czy wpisana komenda rejesteracji (jej parametry są prawidłowe).
+ *  Sprawdza czy wpisana komenda rejesteracji jest ok (jej parametry są prawidłowe).
  */
 bool ClientInterface::checkRegisterCommandCorectness()
 {
@@ -304,6 +304,32 @@ bool ClientInterface::checkRegisterCommandCorectness()
     else
     {
         cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło] [powtórzone hasło]\n";
+        return false;
+    }
+    return true;
+}
+
+/**
+ *  Sprawdza czy wpisana komenda wyrejesterowania jest ok (jej parametry są prawidłowe).
+ */
+bool ClientInterface::checkUnregisterCommandCorectness()
+{
+    if (command.size() >= 2)
+    {
+        if (command[0].length() < 3)
+        {
+            cout << "# BŁĄD: Nazwa użytkownika musi składać się przynajmniej z 3 znaków!\n";
+            return false;
+        }
+        else if (command[1].length() == 0)
+        {
+            cout << "# BŁĄD: Hasło musi składać się przynajmniej z 1 znaku!\n";
+            return false;
+        }
+    }
+    else
+    {
+        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło]\n";
         return false;
     }
     return true;
@@ -336,7 +362,19 @@ void ClientInterface::followTaskOnServer(Action action)
             }
             else if (action == REGISTER)
             {
-                if (checkRegisterCommandCorectness()) // jeśli komenda register poprawna
+                if (checkRegisterCommandCorectness())
+                {
+                    command[1] = md5(command[1]); // zmieniamy hasło na jego hash
+                    command.resize(2); // zostawiamy tylko login i hash
+                }
+                else
+                {
+                    return;
+                }
+            }
+            else if (action == UNREGISTER)
+            {
+                if (checkUnregisterCommandCorectness())
                 {
                     command[1] = md5(command[1]); // zmieniamy hasło na jego hash
                     command.resize(2); // zostawiamy tylko login i hash
@@ -478,14 +516,14 @@ void ClientInterface::processResponse(Action action, Response* response, Message
         {
             switch (action)
             {
-                case LOGIN:
-                {
-                    cout << "# BŁĄD: Podana nazwa użytkownika nie istnieje!\n";
-                    break;
-                }
                 case REGISTER:
                 {
                     cout << "# BŁĄD: Podana nazwa użytkownika jest zajęta!\n";
+                    break;
+                }
+                default:
+                {
+                    cout << "# BŁĄD: Podana nazwa użytkownika nie istnieje!\n";
                     break;
                 }
             }

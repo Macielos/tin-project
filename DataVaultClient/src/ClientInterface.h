@@ -29,6 +29,7 @@ class ClientInterface
         inline bool checkFileExist (const std::string& name);
         unsigned int checkFilenamesCorectness();
         bool checkRegisterCommandCorectness();
+        bool checkUnregisterCommandCorectness();
 
         bool interpretCommand(string commandLine);
         void followTaskOnServer(Action action);
