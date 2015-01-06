@@ -476,7 +476,19 @@ void ClientInterface::processResponse(Action action, Response* response, Message
         }
         case INCORRECT_LOGIN:
         {
-            cout << "# BŁĄD: Podana nazwa użytkownika nie istnieje!\n";
+            switch (action)
+            {
+                case LOGIN:
+                {
+                    cout << "# BŁĄD: Podana nazwa użytkownika nie istnieje!\n";
+                    break;
+                }
+                case REGISTER:
+                {
+                    cout << "# BŁĄD: Podana nazwa użytkownika jest zajęta!\n";
+                    break;
+                }
+            }
             break;
         }
         case INCORRECT_PASSWORD:
