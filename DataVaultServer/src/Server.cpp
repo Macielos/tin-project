@@ -18,7 +18,6 @@ void Server::listen()
         boost::array<char, 128> messageBuffer;
         boost::system::error_code error;
 
-
         while(!interrupted)
         {
             cout<<"Server is listening..."<<endl;

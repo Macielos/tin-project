@@ -15,55 +15,29 @@ ServerStore::~ServerStore()
 
 vector<string> ServerStore::list(string username)
 {
-    // Przejscie po liscie wszystkich userow
-    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
-    {
-        // jeśli znaleziono usera
-        if(it->getUsername() == username)
-            return it->getFilelist();
-    }
-    // jesli usera nie ma w bazie
-    vector<string> nouser;
-    nouser.push_back("/nouser");
-    return nouser;
-
+    return users[username].getFilelist();
 }
 
 int ServerStore::add(string username, string filename)
 {
-    // Przejscie po liscie wszystkich userow
-    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
-    {
-        // jeśli znaleziono usera
-        if(it->getUsername() == username)
-            return it->add(filename);
-    }
     // jesli usera nie ma w bazie
-    return -1;
+    if(users.find(username) == users.end())
+        return -1;
+    return users[username].add(filename);
 }
 
 int ServerStore::remove(string username, string filename)
 {
-    // Przejscie po liscie wszystkich userow
-    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
-    {
-        // jeśli znaleziono usera
-        if(it->getUsername() == username)
-            return it->remove(filename);
-    }
-    // jesli usera nie ma w bazie
-    return -1;
+     // jesli usera nie ma w bazie
+    if(users.find(username) == users.end())
+        return -1;
+    return users[username].remove(filename);
 }
 
 int ServerStore::rename(string username, string oldname, string newname)
 {
-    // Przejscie po liscie wszystkich userow
-    for(vector<User>::iterator it = users.begin(); it != users.end(); ++it)
-    {
-        // jeśli znaleziono usera
-        if(it->getUsername() == username)
-            return it->rename(oldname, newname);
-    }
     // jesli usera nie ma w bazie
-    return -1;
+    if(users.find(username) == users.end())
+        return -1;
+    return users[username].rename(oldname, newname);
 }

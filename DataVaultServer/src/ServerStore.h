@@ -1,6 +1,7 @@
 #include "User.h"
 #include <vector>
 #include <string>
+#include <map>
 
 using namespace std;
 
@@ -9,8 +10,8 @@ class ServerStore
     public:
         ServerStore();
         ~ServerStore();
-        // zwraca "/nouser" jak nie ma usera
-        vector<string> list(string username);  // Co zwracać jak nie ma usera???
+        // zwraca users.end() jak nie ma usera
+        vector<string> list(string username);
         /*
         zwraca 0 jak się udało
         zwraca -1 jak brak usera
@@ -32,9 +33,10 @@ class ServerStore
         int rename(string username, string oldname, string newname);
 
         // bedzie laczone pewnie z klasa michala
-        vector<User> users;
+        // vector<User> users;
+        map<string, User> users;
+
 
     private:
-
 
 };

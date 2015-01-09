@@ -1,4 +1,4 @@
-#include "FileMap.h"
+#include "File.h"
 #include <string>
 #include <vector>
 
@@ -19,7 +19,7 @@ class User
 
     private:
         string username;
-        FileMap filemap;
+        map<string, File> files;
 
 
 };
