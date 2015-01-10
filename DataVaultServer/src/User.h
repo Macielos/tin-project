@@ -6,6 +6,9 @@ using namespace std;
 
 class User
 {
+        string username;
+        map<string, File> files;
+
     public:
         User();
         ~User();
@@ -16,10 +19,5 @@ class User
         int add(string filename);
         int remove(string filename);
         int rename(string oldname, string newname);
-
-    private:
-        string username;
-        map<string, File> files;
-
 
 };

@@ -7,6 +7,8 @@ using namespace std;
 
 class ServerStore
 {
+        map<string, User> users;
+
     public:
         ServerStore();
         ~ServerStore();
@@ -34,9 +36,5 @@ class ServerStore
 
         // bedzie laczone pewnie z klasa michala
         // vector<User> users;
-        map<string, User> users;
-
-
-    private:
 
 };
