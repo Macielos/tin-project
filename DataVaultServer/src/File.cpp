@@ -23,7 +23,7 @@ string File::getFilename()
     return filename;
 }
 
-int File::setFilename(string filename)
+void File::setFilename(string filename)
 {
     this->filename = filename;
 }

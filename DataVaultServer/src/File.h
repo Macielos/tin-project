@@ -10,7 +10,7 @@ class File
         File(string filename);
         ~File();
         string getFilename();
-        int setFilename(string filename);
+        void setFilename(string filename);
 
     private:
         string filename;
