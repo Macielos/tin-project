@@ -12,20 +12,24 @@ class ServerStore
     public:
         ServerStore();
         ~ServerStore();
+
         // zwraca users.end() jak nie ma usera
         vector<string> list(string username);
+
         /*
         zwraca 0 jak się udało
         zwraca -1 jak brak usera
         zwraca -2 jak plik o nazwie istnieje
         */
         int add(string username, string filename);
+
         /*
         zwraca 0 jak się udało
         zwraca -1 jak brak usera
         zwraca -2 jak plik o nazwie nie istnieje
         */
         int remove(string username, string filename);
+
         /*
         zwraca 0 jak się udało
         zwraca -1 jak brak usera
@@ -34,7 +38,6 @@ class ServerStore
         */
         int rename(string username, string oldname, string newname);
 
-        // bedzie laczone pewnie z klasa michala
-        // vector<User> users;
+        bool fileExists(string username, string filename);
 
 };

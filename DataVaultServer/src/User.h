@@ -19,5 +19,6 @@ class User
         int add(string filename);
         int remove(string filename);
         int rename(string oldname, string newname);
+        bool fileExists(string filename);
 
 };

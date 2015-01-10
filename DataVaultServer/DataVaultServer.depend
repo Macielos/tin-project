@@ -44,6 +44,8 @@
 1420642445 source:/home/zabor/Projects/tin-project/DataVaultServer/src/ServerStore.cpp
 	"ServerStore.h"
 
+1420642445 D
+
 1419863168 source:/home/zabor/Projects/tin-project/DataVaultServer/src/main.cpp
 	"Server.h"
 	<boost/lexical_cast.hpp>
@@ -69,5 +71,200 @@
 	<map>
 
 1420641766 source:/home/zabor/Projects/tin-project/DataVaultServer/src/File.cpp
+	"File.h"
+
+1420456253 source:/home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Message.cpp
+	"Message.h"
+
+1420456253 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Message.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1420047458 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileTransferManager.cpp
+	"FileTransferManager.h"
+
+1420042066 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"../DataVaultAPI/src/Message.h"
+
+1420456254 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/main.cpp
+	"Server.h"
+	<boost/lexical_cast.hpp>
+
+1420462594 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/Server.h
+	<boost/archive/text_iarchive.hpp>
+	<boost/archive/text_oarchive.hpp>
+	<boost/array.hpp>
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/bind.hpp>
+	<iostream>
+	<sstream>
+	<string>
+	<cstdio>
+	"ServerStore.h"
+	"../DataVaultAPI/src/FileTransferManager.h"
+	"../DataVaultAPI/src/Message.h"
+	"../DataVaultAPI/src/Response.h"
+
+1420464284 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/ServerStore.h
+	"User.h"
+	<vector>
+	<string>
+
+1420467164 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/Server.cpp
+	"Server.h"
+
+1420467132 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/ServerStore.cpp
+	"ServerStore.h"
+
+1420462710 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Constants.h
+
+1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Message.cpp
+	"Message.h"
+
+1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Message.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Constants.h
+
+1420892186 source:/home/maciek/workspace/tin-project/DataVaultServer/src/ServerStore.cpp
+	"ServerStore.h"
+
+1420891532 /home/maciek/workspace/tin-project/DataVaultServer/src/ServerStore.h
+	"User.h"
+	<vector>
+	<string>
+	<map>
+
+1420891217 source:/home/maciek/workspace/tin-project/DataVaultServer/src/main.cpp
+	"Server.h"
+	<boost/lexical_cast.hpp>
+
+1420891715 /home/maciek/workspace/tin-project/DataVaultServer/src/Server.h
+	<boost/archive/text_iarchive.hpp>
+	<boost/archive/text_oarchive.hpp>
+	<boost/array.hpp>
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/bind.hpp>
+	<iostream>
+	<sstream>
+	<string>
+	<cstdio>
+	"ServerStore.h"
+	"../DataVaultAPI/src/FileTransferManager.h"
+	"../DataVaultAPI/src/Message.h"
+	"../DataVaultAPI/src/Response.h"
+
+1420133051 /home/maciek/workspace/tin-project/DataVaultServer/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"../DataVaultAPI/src/Message.h"
+
+1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/FileTransferManager.cpp
+	"FileTransferManager.h"
+
+1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"Constants.h"
+
+1420891942 source:/home/maciek/workspace/tin-project/DataVaultServer/src/Server.cpp
+	"Server.h"
+
+1420457902 source:/home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/FileTransferManager.cpp
+	"FileTransferManager.h"
+
+1420456253 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"Constants.h"
+
+1420458439 source:/home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Response.cpp
+	"Response.h"
+
+1420464373 /home/maciek/workspace/cpp/tin-project/DataVaultAPI/src/Response.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1420464464 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileMap.cpp
+	"FileMap.h"
+
+1420464453 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/FileMap.h
+	<string>
+	<vector>
+
+1420464424 source:/home/maciek/workspace/cpp/tin-project/DataVaultServer/src/User.cpp
+	"User.h"
+
+1420464444 /home/maciek/workspace/cpp/tin-project/DataVaultServer/src/User.h
+	"FileMap.h"
+	<string>
+	<vector>
+
+1420464444 gin/master
+
+1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Response.cpp
+	"Response.h"
+
+1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Response.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1420891217 source:/home/maciek/workspace/tin-project/DataVaultServer/src/FileMap.cpp
+	"FileMap.h"
+
+1420892369 /home/maciek/workspace/tin-project/DataVaultServer/src/User.h
+	"File.h"
+	<string>
+	<vector>
+
+1420891253 /home/maciek/workspace/tin-project/DataVaultServer/src/File.h
+	<string>
+	<map>
+
+1420892488 source:/home/maciek/workspace/tin-project/DataVaultServer/src/User.cpp
+	"User.h"
+
+1420891048 source:/home/maciek/workspace/tin-project/DataVaultServer/src/File.cpp
 	"File.h"
 

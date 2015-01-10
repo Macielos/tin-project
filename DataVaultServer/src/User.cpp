@@ -29,13 +29,13 @@ void User::setUsername(string username)
 
 vector<string> User::getFilelist()
 {
-    vector<string> filelist;
+    vector<string> fileList;
     typedef map<string, File>::iterator it_type;
     for(it_type it = files.begin(); it != files.end(); ++it)
     {
-        filelist.push_back(it->second.getFilename());
+        fileList.push_back(it->second.getFilename());
     }
-    return filelist;
+    return fileList;
 }
 
 int User::add(string filename)
@@ -76,4 +76,6 @@ int User::rename(string oldname, string newname)
     return 0;
 }
 
-
+bool User::fileExists(string filename){
+    return files.find(filename) != files.end();
+}
