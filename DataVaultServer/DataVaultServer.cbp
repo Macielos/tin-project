@@ -11,7 +11,11 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+<<<<<<< HEAD
+				<Option parameters="21000 21001" />
+=======
 				<Option parameters="21000 21001 21002" />
+>>>>>>> origin/master
 				<Compiler>
 					<Add option="-g" />
 					<Add directory="../DataVaultAPI/" />
@@ -48,10 +52,15 @@
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
 		<Unit filename="../DataVaultAPI/src/Message.h" />
+<<<<<<< HEAD
+		<Unit filename="src/File.cpp" />
+		<Unit filename="src/File.h" />
+=======
 		<Unit filename="../DataVaultAPI/src/Response.cpp" />
 		<Unit filename="../DataVaultAPI/src/Response.h" />
 		<Unit filename="src/FileMap.cpp" />
 		<Unit filename="src/FileMap.h" />
+>>>>>>> origin/master
 		<Unit filename="src/Server.cpp" />
 		<Unit filename="src/Server.h" />
 		<Unit filename="src/ServerStore.cpp" />

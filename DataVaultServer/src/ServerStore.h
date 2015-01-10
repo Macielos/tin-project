@@ -1,22 +1,20 @@
 #include "User.h"
 #include <vector>
 #include <string>
+#include <map>
 
 using namespace std;
 
 class ServerStore
 {
-        // bedzie laczone pewnie z klasa michala
-        vector<User> users;
-        vector<string> noUser;
+        map<string, User> users;
 
     public:
         ServerStore();
         ~ServerStore();
 
-        vector<string>& list(string username);
-
-        int save(string username, string filename);
+        // zwraca users.end() jak nie ma usera
+        vector<string> list(string username);
 
         /*
         zwraca 0 jak się udało
@@ -41,4 +39,5 @@ class ServerStore
         int rename(string username, string oldname, string newname);
 
         bool fileExists(string username, string filename);
+
 };
