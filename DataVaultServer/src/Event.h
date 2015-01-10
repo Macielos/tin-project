@@ -1,9 +1,13 @@
-
 class Event
 {
+        long date;
+        string filename;
+        string username;
     public:
-        Event();
+        Event(long date, string filename, string username);
         ~Event();
-    protected:
-    private:
+
+        long getDate();
+        string getFilename();
+        string getUsername();
 };

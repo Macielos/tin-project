@@ -7,34 +7,32 @@ using namespace std;
 
 class ServerStore
 {
-        // bedzie laczone pewnie z klasa michala
-        vector<User> users;
-
-        vector<string> noUser;
+        map<string, User> users;
 
     public:
         ServerStore();
         ~ServerStore();
 
-        vector<string>& list(string username);
+        // zwraca users.end() jak nie ma użytkownika
+        vector<string> list(string username);
 
         /**
         zwraca 0 jak się udało
-        zwraca -1 jak brak usera
+        zwraca -1 jak brak użytkownika
         zwraca -2 jak plik o nazwie istnieje
         */
         int add(string username, string filename);
 
         /**
         zwraca 0 jak się udało
-        zwraca -1 jak brak usera
+        zwraca -1 jak brak użytkownika
         zwraca -2 jak plik o nazwie nie istnieje
         */
         int remove(string username, string filename);
 
         /**
         zwraca 0 jak się udało
-        zwraca -1 jak brak usera
+        zwraca -1 jak brak użytkownika
         zwraca -2 jak plik o starej nazwie nie istnieje
         zwraca -3 jak plik o nowej nazwie istnieje
         */
@@ -42,7 +40,26 @@ class ServerStore
 
         bool fileExists(string username, string filename);
 
-        void addEvent(Event* event);
-        vector<Event*> getHistory(string username, string filename, long from, long to);
-        void clearOldHistory();
+        /**
+        zwraca 0 jak się udało
+        zwraca -1 jak brak użytkownika
+        zwraca -2 jak użytkownik posiada już dostęp do pliku
+        */
+        int giveAccess(string username, string filename);
+
+        /**
+        zwraca 0 jak się udało
+        zwraca -1 jak brak użytkownika
+        zwraca -2 jak użytkownik nie posiada dostępu do pliku
+        */
+        int revokeAccess(string username, string filename);
+
+        int addEvent(string username, EventType type, Event* event);
+
+        History* getHistory(string username);
+
+        int clearHistory(string username);
+
+        void clearAllHistory();
+
 };

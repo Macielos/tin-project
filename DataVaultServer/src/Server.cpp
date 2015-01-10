@@ -70,9 +70,10 @@ void Server::handleMessage(tcp::socket* socket){
                 //break;
             }
 
-            vector<string>& filenames = serverStore.list(message.getUserId());
+            vector<string> filenames = serverStore.list(message.getUserId());
             response = createResponse(OK, filenames);
             socket->write_some(boost::asio::buffer(response), error);
+            filenames.clear();
             break;
         }
         case UPLOAD:

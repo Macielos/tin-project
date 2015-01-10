@@ -43,6 +43,8 @@
 		</Compiler>
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.cpp" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
+		<Unit filename="../DataVaultAPI/src/Md5.cpp" />
+		<Unit filename="../DataVaultAPI/src/Md5.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
 		<Unit filename="../DataVaultAPI/src/Message.h" />
 		<Unit filename="../DataVaultAPI/src/Response.cpp" />
