@@ -40,21 +40,29 @@ class ServerStore
 
         bool fileExists(string username, string filename);
 
-        /**
-        zwraca 0 jak się udało
-        zwraca -1 jak brak użytkownika
-        zwraca -2 jak użytkownik posiada już dostęp do pliku
-        */
-        int giveAccess(string username, string filename);
+        bool userExists(string username);
 
         /**
         zwraca 0 jak się udało
-        zwraca -1 jak brak użytkownika
-        zwraca -2 jak użytkownik nie posiada dostępu do pliku
+        zwraca -2 jak brak pliku
+        zwraca -3 jak brak użytkownika
+        zwraca -4 jak użytkownik posiada już dostęp do pliku
+        zwraca -5 jak użytkownik jest właścicielem pliku
         */
-        int revokeAccess(string username, string filename);
+        int giveAccess(string fileOwner, string requestTarget, string filename);
 
-        int addEvent(string username, EventType type, Event* event);
+        /**
+        zwraca 0 jak się udało
+        zwraca -2 jak brak pliku
+        zwraca -3 jak brak użytkownika
+        zwraca -4 jak użytkownik nie posiada dostępu do pliku
+        zwraca -5 jak użytkownik jest właścicielem pliku
+        */
+        int revokeAccess(string fileOwner, string requestTarget, string filename);
+
+        bool hasAccess(string username, string fileOwner, string filename);
+
+        int addEvent(string username, EventType type, Event& event);
 
         History* getHistory(string username);
 

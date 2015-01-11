@@ -1,5 +1,7 @@
 #include "Event.h"
 
+using namespace std;
+
 Event::Event(long date, string filename, string username):
     date(date), filename(filename), username(username)
 {

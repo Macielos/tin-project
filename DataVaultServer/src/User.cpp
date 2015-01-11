@@ -80,7 +80,59 @@ bool User::fileExists(string filename){
     return files.find(filename) != files.end();
 }
 
-void User::addEvent(EventType type, Event* event){
+File* User::getFile(string filename){
+    if(files.find(filename) == files.end()){
+        return NULL;
+    }
+    return &files[filename];
+}
+
+int User::giveAccess(File* file)
+{
+    if(fileExists(file->getFilename())){
+        return -5;
+    }
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        if(*it == file){
+            return -4;
+        }
+    }
+    sharedFiles.push_back(file);
+    return 0;
+}
+
+int User::revokeAccess(File* file)
+{
+    if(fileExists(file->getFilename())){
+        return -5;
+    }
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        if(*it == file){
+            sharedFiles.erase(it);
+            return 0;
+        }
+    }
+    return -4;
+}
+
+void User::clearAccessRights()
+{
+    sharedFiles.clear();
+}
+
+bool User::hasAccess(File* file){
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        if(*it == file){
+            return true;
+        }
+    }
+    return false;
+}
+
+void User::addEvent(EventType type, Event& event){
     history.addEvent(type, event);
 }
 
@@ -90,3 +142,5 @@ History* User::getHistory(){
 void User::clearHistory(){
     history.clearHistory();
 }
+
+

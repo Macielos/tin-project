@@ -1,4 +1,8 @@
-#include<vector>
+#include <vector>
+
+#include "Event.h"
+
+using namespace std;
 
 /**
  *  Możliwe typy zdarzeń dla śledzonych plików
@@ -22,6 +26,6 @@ class History
         ~History();
 
         void addEvent(EventType type, Event& event);
-        vector<Event>& getEvents(EventType type);
+        vector<Event>* getEvents(EventType type);
         void clearHistory();
 };

@@ -148,6 +148,10 @@ bool ClientInterface::interpretCommand(string commandLine)
         {
             changeParameter(NOTIFICATION_PORT, command[1]);
         }
+        else if (c_t == "name")
+        {
+            client.setUserId(command[1]);
+        }
         else
         {
             cout << "# BŁĄD: Nie rozpoznano parametru '" << c_t << "'!\n";
@@ -190,6 +194,11 @@ bool ClientInterface::interpretCommand(string commandLine)
     else if (c == "download")
     {
         followTaskOnServer(DOWNLOAD);
+    }
+    // DOWNLOAD SHARED
+    else if (c == "download_shared")
+    {
+        followTaskOnServer(DOWNLOAD_SHARED);
     }
     // REMOVE
     else if (c == "remove")
@@ -469,47 +478,82 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                     }
                     break;
                 }
+                case DOWNLOAD_SHARED:
+                {
+                    bool result;
+                    for (unsigned int i = 1; i < message.getParameters().size(); ++i)
+                    {
+                        cout << "Pobieranie pliku " << message.getParameters()[i] << "...\n";
+                        result = client.receiveFile(message.getParameters()[i], true);
+                        if (!result)
+                        {
+                            cout << "# BŁĄD: Nie udało się pobrać pliku!\n";
+                            break;
+                        }
+                    }
+                    break;
+                }
                 case REMOVE:
                 {
-                    cout << "Plik " << "[nazwa pliku]" << " został usunięty z serwera.\n";
+                    cout << "Pliki zostały usunięte z serwera.\n";
                     break;
                 }
                 case RENAME:
                 {
-                    cout << "Pomyślnie zmieniono nazwę pliku na serwera.\n";
+                    cout << "Pomyślnie zmieniono nazwę pliku na serwerze.\n";
                     break;
                 }
                 case GIVE_ACCESS:
                 {
-                    cout << "Przyznano uprawnienia dostępu do pliku " << " dla użytkownika " << "[login]" << ".\n";
+                    cout << "Przyznano uprawnienia dostępu do plików dla użytkownika " << message.getParameters()[0] << ".\n";
                     break;
                 }
                 case REVOKE_ACCESS:
                 {
-                    cout << "Uprawnienia dostępu do tego pliku zostały cofnięte użytkownikowi " << "[login]" << ".n";
+                    cout << "Uprawnienia dostępu do plików zostały cofnięte użytkownikowi " << message.getParameters()[0] << ".n";
                     break;
                 }
             }
             break;
         }
-        case WRONG_SYNTAX: // co tu ma być? kiedy jest taki response?!
+        case WRONG_SYNTAX:
         {
-            cout << "# BŁĄD: Wrong SYNTAX error.\n";
+            cout << "# BŁĄD: Niepoprawne polecenie lub liczba argumentów.\n";
             break;
         }
         case FILE_EXISTS:
         {
-            cout << "Plik o podanej nazwie istnieje już na serwerze.\n";
+            cout << "# BŁĄD: Plik o podanej nowej nazwie istnieje już na serwerze.\n";
             break;
         }
         case NO_SUCH_FILE:
         {
-            cout << "Plik o podanej nazwie nie istnieje na serwerze.\n";
+            cout << "# BŁĄD: Pliki o podanych nazwach nie istnieją na serwerze.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case NO_SUCH_USER:
+        {
+            cout << "# BŁĄD: Użytkownik o podanej nazwie nie jest zarejestrowany na serwerze.\n";
             break;
         }
         case ACCESS_DENIED:
         {
-            cout << "Nie masz dostępu do tego pliku.\n";
+            cout << "# BŁĄD: Odmówiono dostępu do podanych plików.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case ALREADY_HAVE_ACCESS:
+        {
+            cout << "# BŁĄD: Działanie bez efektu. Użytkownik ma już dostęp do podanych plików.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case ALREADY_NO_ACCESS:
+        {
+            cout << "# BŁĄD: Działanie bez efektu. Użytkownik nie ma dostępu do podanych plików.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case OWN_FILE:
+        {
+            cout << "# BŁĄD: Próba przyznania/odebrania samemu sobie dostępu do własnego pliku. Interesująca, acz pozbawiona sensu.\n" << printParameters(response->getParameters()) << endl;
             break;
         }
         case INCORRECT_LOGIN:
@@ -588,4 +632,15 @@ inline void ClientInterface::showHelp()
          << "  help         - pokazuje tę pomoc\n"
          << "  exit/quit    - wchodzi z programu\n"
          << endl;
+}
+
+string ClientInterface::printParameters(vector<string>& parameters){
+    stringstream ss;
+    for(unsigned int i=0; i<parameters.size(); ++i){
+        ss << parameters[i];
+        if(i!=parameters.size()-1){
+            ss << " ";
+        }
+    }
+    return ss.str();
 }

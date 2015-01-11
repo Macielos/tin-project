@@ -7,6 +7,9 @@ ServerStore::ServerStore()
     User user;
     user.setUsername("user123");
     users.insert(make_pair(user.getUsername(), user));
+    User user2;
+    user2.setUsername("user456");
+    users.insert(make_pair(user2.getUsername(), user2));
 }
 
 ServerStore::~ServerStore()
@@ -49,27 +52,54 @@ bool ServerStore::fileExists(string username, string filename){
     return users[username].fileExists(filename);
 }
 
-int giveAccess(string username, string filename){
-    if(users.find(username) == users.end())
-        return -1;
-    return users[username].giveAccess(filename);
+bool ServerStore::userExists(string username){
+    return users.find(username) != users.end();
 }
 
-int revokeAccess(string username, string filename){
-    if(users.find(username) == users.end())
+int ServerStore::giveAccess(string fileOwner, string requestTarget, string filename){
+    if(users.find(fileOwner) == users.end())
         return -1;
-    return users[username].revokeAccess(filename);
+    if(users.find(requestTarget) == users.end())
+        return -3;
+    File* file = users[fileOwner].getFile(filename);
+    if(file==NULL)
+        return -2;
+    return users[requestTarget].giveAccess(file);
 }
 
-int ServerStore::addEvent(string username, EventType type, Event* event){
-    if(users.find(username) == users.end())
+int ServerStore::revokeAccess(string fileOwner, string requestTarget, string filename){
+    if(users.find(fileOwner) == users.end())
         return -1;
-   return users[username].addEvent(type, event);
+    if(users.find(requestTarget) == users.end())
+        return -3;
+    File* file = users[fileOwner].getFile(filename);
+    if(file==NULL)
+        return -2;
+    return users[requestTarget].revokeAccess(file);
+}
+
+bool ServerStore::hasAccess(string username, string fileOwner, string filename){
+    if(users.find(username) == users.end())
+        return false;
+    if(users.find(fileOwner) == users.end())
+        return false;
+    File* file = users[fileOwner].getFile(filename);
+    if(file==NULL)
+        return false;
+    return users[username].hasAccess(file);
+
+}
+
+int ServerStore::addEvent(string username, EventType type, Event& event){
+    if(users.find(username) == users.end())
+        return -3;
+    users[username].addEvent(type, event);
+    return 0;
 }
 
 History* ServerStore::getHistory(string username){
     if(users.find(username) == users.end())
-        return nullptr;
+        return NULL;
     return users[username].getHistory();
 }
 
@@ -82,7 +112,7 @@ int ServerStore::clearHistory(string username){
 
 void ServerStore::clearAllHistory(){
     typedef map<string, User>::iterator it_type;
-    for(it_type it = files.begin(); it != files.end(); ++it)
+    for(it_type it = users.begin(); it != users.end(); ++it)
     {
         it->second.clearHistory();
     }

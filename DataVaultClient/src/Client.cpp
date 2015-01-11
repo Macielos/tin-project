@@ -84,6 +84,9 @@ bool Client::setNotificationPort(int notificationPort)
     }
 }
 
+void Client::setUserId(string userId){
+    this->userId = userId;
+}
 
 /*
     GETery flag.

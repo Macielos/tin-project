@@ -13,51 +13,53 @@ void History::addEvent(EventType type, Event& event)
 {
     switch(type){
     case FILE_MODIFIED:
-        modifiedFiles.add(event);
+        modifiedFiles.push_back(event);
         break;
     case FILE_REMOVED:
-        removedFiles.add(event);
+        removedFiles.push_back(event);
         break;
     case FILE_RENAMED:
-        renamedFiles.add(event);
+        renamedFiles.push_back(event);
         break;
     case SHARED_FILE_MODIFIED:
-        modifiedSharedFiles.add(event);
+        modifiedSharedFiles.push_back(event);
         break;
     case SHARED_FILE_REMOVED:
-        removedSharedFiles.add(event);
+        removedSharedFiles.push_back(event);
         break;
     case SHARED_FILE_RENAMED:
-        renamedSharedFiles.add(event);
+        renamedSharedFiles.push_back(event);
         break;
     case ACCESS_GRANTED:
-        accessGrants.add(event);
+        accessGrants.push_back(event);
         break;
     case ACCESS_REVOKED:
-        accessRevokes.add(event);
+        accessRevokes.push_back(event);
         break;
     }
 }
 
-vector<Event>& History::getEvents(EventType type)
+vector<Event>* History::getEvents(EventType type)
 {
     switch(type){
     case FILE_MODIFIED:
-        return modifiedFiles;
+        return &modifiedFiles;
     case FILE_REMOVED:
-        return removedFiles;
+        return &removedFiles;
     case FILE_RENAMED:
-        return renamedFiles;
+        return &renamedFiles;
     case SHARED_FILE_MODIFIED:
-        return modifiedSharedFiles;
+        return &modifiedSharedFiles;
     case SHARED_FILE_REMOVED:
-        return removedSharedFiles;
+        return &removedSharedFiles;
     case SHARED_FILE_RENAMED:
-        return renamedSharedFiles;
+        return &renamedSharedFiles;
     case ACCESS_GRANTED:
-        return accessGrants;
+        return &accessGrants;
     case ACCESS_REVOKED:
-        return accessRevokes;
+        return &accessRevokes;
+    default:
+        return NULL;
     }
 }
 
@@ -70,5 +72,5 @@ void History::clearHistory()
     removedSharedFiles.clear();
     renamedSharedFiles.clear();
     accessGrants.clear();
-    vaccessRevokes.clear();
+    accessRevokes.clear();
 }

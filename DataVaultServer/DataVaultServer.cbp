@@ -58,7 +58,6 @@
 		<Unit filename="src/Event.h" />
 		<Unit filename="src/File.cpp" />
 		<Unit filename="src/File.h" />
-		<Unit filename="src/FileMap.h" />
 		<Unit filename="src/History.cpp" />
 		<Unit filename="src/History.h" />
 		<Unit filename="src/Server.cpp" />

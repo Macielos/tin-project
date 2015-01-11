@@ -1,6 +1,8 @@
-#include "File.h"
 #include <string>
 #include <vector>
+
+#include "File.h"
+#include "History.h"
 
 using namespace std;
 
@@ -8,6 +10,7 @@ class User
 {
         string username;
         map<string, File> files;
+        vector<File*> sharedFiles;
         History history;
 
     public:
@@ -22,8 +25,14 @@ class User
         int remove(string filename);
         int rename(string oldname, string newname);
         bool fileExists(string filename);
+        File* getFile(string filename);
 
-        void addEvent(EventType type, Event* event);
+        int giveAccess(File* file);
+        int revokeAccess(File* file);
+        void clearAccessRights();
+        bool hasAccess(File* file);
+
+        void addEvent(EventType type, Event& event);
         History* getHistory();
         void clearHistory();
 };

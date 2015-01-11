@@ -6,7 +6,6 @@ using namespace std;
 class File
 {
         string filename;
-        vector<User*> usersWithAccess;
 
     public:
         File();
@@ -14,8 +13,5 @@ class File
         ~File();
         string getFilename();
         void setFilename(string filename);
-        int giveAccess(User* user);
-        int revokeAccess(User* user);
-        void clearAccessRights();
 
 };
