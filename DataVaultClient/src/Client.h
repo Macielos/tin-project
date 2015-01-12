@@ -61,6 +61,7 @@ class Client
         bool isValidParameters();
         bool isConnected();
         bool isLogged();
+        void setLogged(bool loggedStatus);
 
         bool connect();
         Response* sendMessage(Message& message);

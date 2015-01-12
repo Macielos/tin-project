@@ -1,20 +1,25 @@
 #include "User.h"
 #include <vector>
 #include <string>
-#include <map>
+#include <iostream>
+#include <fstream>
+#include <stdio.h>
 
 using namespace std;
 
 class ServerStore
 {
-        map<string, User> users;
+        // bedzie laczone pewnie z klasa michala
+        vector<User> users;
+        vector<string> noUser;
 
     public:
         ServerStore();
         ~ServerStore();
 
-        // zwraca users.end() jak nie ma usera
-        vector<string> list(string username);
+        vector<string>& list(string username);
+
+        int save(string username, string filename);
 
         /*
         zwraca 0 jak się udało
@@ -38,6 +43,26 @@ class ServerStore
         */
         int rename(string username, string oldname, string newname);
 
-        bool fileExists(string username, string filename);
+        /*
+        zwraca 0 jak się udało
+        zwraca -1 jak username w użyciu
+        */
+        int registerUser(string username, string hash);
 
+        /*
+        zwraca 0 jak się udało
+        zwraca -1 jak brak usera
+        zwraca -2 jak błędny hash
+        */
+        int unregisterUser(string username, string hash);
+
+        /*
+        zwraca 0 jak się udało
+        zwraca -1 jak brak usera
+        zwraca -2 jak błędny hash
+        */
+        int loginUser(string username, string hash);
+
+        bool fileExists(string username, string filename);
+        bool loginFileExists(string filename);
 };

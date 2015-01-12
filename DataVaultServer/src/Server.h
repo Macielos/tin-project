@@ -15,7 +15,6 @@
 #include "../DataVaultAPI/src/Message.h"
 #include "../DataVaultAPI/src/Response.h"
 
-
 using namespace std;
 
 class Server

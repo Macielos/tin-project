@@ -309,6 +309,28 @@ bool ClientInterface::checkRegisterCommandCorectness()
     return true;
 }
 
+bool ClientInterface::checkLoginCommandCorrectness()
+{
+    if (command.size() >= 2)
+    {
+        if (command[0].length() < 3)
+        {
+            cout << "# BŁĄD: Nazwa użytkownika musi składać się przynajmniej z 3 znaków!\n";
+            return false;
+        }
+        else if ( (command[1].length() == 0) )
+        {
+            cout << "# BŁĄD: Hasło musi składać się przynajmniej z 1 znaku!\n";
+            return false;
+        }
+    }
+    else
+    {
+        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło] \n";
+        return false;
+    }
+    return true;
+}
 /**
  *  Sprawdza czy wpisana komenda wyrejesterowania jest ok (jej parametry są prawidłowe).
  */
@@ -350,6 +372,14 @@ void ClientInterface::followTaskOnServer(Action action)
         {
             cout << "# BŁĄD: Nie jesteś zalogowany aby móc wykonać tę akcję! Użyj polecenia login [nazwa użytkownika] [hasło]\n";
         }
+        else if ( action == REGISTER && client.isLogged() )
+                {
+                    cout << "# BŁĄD: Wyloguj sie aby zarejestrowac nowego uzytkownika\n";
+                }
+        else if ( action == LOGIN && client.isLogged() )
+                {
+                    cout << "# BŁĄD: Jestes juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj sie.\n";
+                }
         else
         {
             if (action == UPLOAD)
@@ -374,7 +404,7 @@ void ClientInterface::followTaskOnServer(Action action)
             }
             else if (action == UNREGISTER)
             {
-                if (checkUnregisterCommandCorectness())
+                if (checkLoginCommandCorrectness())
                 {
                     command[1] = md5(command[1]); // zmieniamy hasło na jego hash
                     command.resize(2); // zostawiamy tylko login i hash
@@ -384,6 +414,30 @@ void ClientInterface::followTaskOnServer(Action action)
                     return;
                 }
             }
+            else if (action == LOGIN)
+            {
+                    if (checkLoginCommandCorrectness())
+                    {
+                        command[1] = md5(command[1]); // zmieniamy hasło na jego hash
+                        command.resize(2); // zostawiamy tylko login i hash
+                    }
+                    else
+                    {
+                        return;
+                    }
+            }
+            else if (action == LOGOUT)
+            {
+                if(client.isLogged())
+                {
+                    client.setLogged(false);
+                }
+                else
+                {
+                cout << "Polecenie dziala po zalogowaniu.\n";
+                }
+            }
+
 
             Message message(action, command);
             Response* response = client.sendMessage(message);
@@ -418,6 +472,7 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                 case LOGIN:
                 {
                     cout << "Poprawnie zalogowano do serwera " << ".\n";
+                    client.setLogged(true);
                     break;
                 }
                 case LOGOUT:
