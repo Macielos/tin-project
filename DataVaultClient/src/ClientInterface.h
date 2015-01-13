@@ -30,6 +30,7 @@ class ClientInterface
         unsigned int checkFilenamesCorectness();
         bool checkRegisterCommandCorectness();
         bool checkUnregisterCommandCorectness();
+        bool checkLoginCommandCorectness();
 
         bool interpretCommand(string commandLine);
         void followTaskOnServer(Action action);

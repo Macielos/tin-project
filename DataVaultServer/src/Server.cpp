@@ -56,11 +56,90 @@ void Server::handleMessage(tcp::socket* socket){
     vector<string> mismatchingParameters;
 
     switch(message.getAction()){
-        case REGISTER: case LOGIN: case LOGOUT: case UNREGISTER:
-            //TODO
-            response = createResponse(NOT_IMPLEMENTED);
+               case REGISTER:
+        {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // tworzymy użyszkodnika
+                result = serverStore.registerUser(message.getParameters()[0], message.getParameters()[1]);
+                switch (result)
+                {
+                    case 0: // użytkownik dodany poprawnie
+                        response = createResponse(OK);
+                        break;
+                    case -1: // login zajęty
+                        response = createResponse(INCORRECT_LOGIN);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            break;
+        }
+        case LOGIN:
+        {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // logowanie użyszkodnika
+                result = serverStore.loginUser(message.getParameters()[0], message.getParameters()[1]);
+                switch (result)
+                {
+                    case 0: // użytkownik zalogowany poprawnie
+                        response = createResponse(OK);
+                        break;
+                    case -1: // niepoprawny login
+                        response = createResponse(INCORRECT_LOGIN);
+                        break;
+                    case -2: // niepoprawne haslo
+                        response = createResponse(INCORRECT_PASSWORD);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            break;
+        }
+        case LOGOUT:
+        {
+            response = createResponse(OK);
             socket->write_some(boost::asio::buffer(response), error);
             break;
+        }
+        case UNREGISTER:
+        {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // usuwamy użyszkodnika
+                result = serverStore.unregisterUser(message.getParameters()[0], message.getParameters()[1]);
+                switch (result)
+                {
+                    case 0: // użytkownik usunięty poprawnie
+                        response = createResponse(OK);
+                        break;
+                    case -1: // login błędny
+                        response = createResponse(INCORRECT_LOGIN);
+                        break;
+                    case -2: // hasło błędne
+                        response = createResponse(INCORRECT_PASSWORD);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            break;
+        }
         case LIST:
         {
             //jeśli podano parametry - błąd

@@ -16,7 +16,7 @@ Client::Client(): fileTransferManager(ioService), socket(ioService)
 
     validParameters = false;
     connected = false;
-    logged = true;
+    logged = false;
 }
 
 Client::~Client()
@@ -101,6 +101,11 @@ bool Client::isConnected()
 bool Client::isLogged()
 {
     return logged;
+}
+
+void Client::setLogged(bool loggedStatus)
+{
+    logged = loggedStatus;
 }
 
 /**

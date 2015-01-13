@@ -58,6 +58,8 @@ class Client
         bool setDataPort(int dataPort);
         bool setNotificationPort(int notificationPort);
 
+        void setLogged(bool loggedStatus);
+
         bool isValidParameters();
         bool isConnected();
         bool isLogged();
