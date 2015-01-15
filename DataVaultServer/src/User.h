@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "File.h"
-#include "History.h"
+#include "../DataVaultAPI/src/LoginResponse.h"
 
 using namespace std;
 

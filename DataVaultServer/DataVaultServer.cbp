@@ -48,18 +48,20 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="../DataVaultAPI/src/Constants.h" />
+		<Unit filename="../DataVaultAPI/src/Event.cpp" />
+		<Unit filename="../DataVaultAPI/src/Event.h" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.cpp" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
+		<Unit filename="../DataVaultAPI/src/History.cpp" />
+		<Unit filename="../DataVaultAPI/src/History.h" />
+		<Unit filename="../DataVaultAPI/src/LoginResponse.cpp" />
+		<Unit filename="../DataVaultAPI/src/LoginResponse.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
 		<Unit filename="../DataVaultAPI/src/Message.h" />
 		<Unit filename="../DataVaultAPI/src/Response.cpp" />
 		<Unit filename="../DataVaultAPI/src/Response.h" />
-		<Unit filename="src/Event.cpp" />
-		<Unit filename="src/Event.h" />
 		<Unit filename="src/File.cpp" />
 		<Unit filename="src/File.h" />
-		<Unit filename="src/History.cpp" />
-		<Unit filename="src/History.h" />
 		<Unit filename="src/Server.cpp" />
 		<Unit filename="src/Server.h" />
 		<Unit filename="src/ServerStore.cpp" />

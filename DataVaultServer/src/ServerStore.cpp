@@ -2,6 +2,8 @@
 
 using namespace std;
 
+typedef map<string, User>::iterator it_type;
+
 ServerStore::ServerStore()
 {
     User user;
@@ -40,23 +42,52 @@ int ServerStore::remove(string username, string filename)
 
 int ServerStore::rename(string username, string oldname, string newname)
 {
+    int result;
+    int accessResult;
     // jesli usera nie ma w bazie
     if(users.find(username) == users.end())
         return -1;
-    return users[username].rename(oldname, newname);
+
+    vector<string> usersWithAccess;
+    for(it_type it = users.begin(); it != users.end(); ++it)
+    {
+        if(it->first!=username && it->second.hasAccess(users[username].getFile(oldname))){
+            usersWithAccess.push_back(it->first);
+            accessResult = revokeAccess(username, it->first, oldname);
+            if(accessResult!=0){
+                cerr<<"Error revoking access to "<<oldname<<endl;
+            }
+        }
+    }
+
+    cout<<"Users with access: "<<usersWithAccess.size()<<endl;
+    result = users[username].rename(oldname, newname);
+
+    for(vector<string>::iterator it = usersWithAccess.begin(); it != usersWithAccess.end(); ++it)
+    {
+        accessResult = giveAccess(username, *it, newname);
+        if(accessResult!=0){
+                cerr<<"Error granting access to "<<newname<<endl;
+        }
+    }
+
+    return result;
 }
 
-bool ServerStore::fileExists(string username, string filename){
+bool ServerStore::fileExists(string username, string filename)
+{
     if(users.find(username) == users.end())
         return false;
     return users[username].fileExists(filename);
 }
 
-bool ServerStore::userExists(string username){
+bool ServerStore::userExists(string username)
+{
     return users.find(username) != users.end();
 }
 
-int ServerStore::giveAccess(string fileOwner, string requestTarget, string filename){
+int ServerStore::giveAccess(string fileOwner, string requestTarget, string filename)
+{
     if(users.find(fileOwner) == users.end())
         return -1;
     if(users.find(requestTarget) == users.end())
@@ -67,7 +98,8 @@ int ServerStore::giveAccess(string fileOwner, string requestTarget, string filen
     return users[requestTarget].giveAccess(file);
 }
 
-int ServerStore::revokeAccess(string fileOwner, string requestTarget, string filename){
+int ServerStore::revokeAccess(string fileOwner, string requestTarget, string filename)
+{
     if(users.find(fileOwner) == users.end())
         return -1;
     if(users.find(requestTarget) == users.end())
@@ -78,7 +110,8 @@ int ServerStore::revokeAccess(string fileOwner, string requestTarget, string fil
     return users[requestTarget].revokeAccess(file);
 }
 
-bool ServerStore::hasAccess(string username, string fileOwner, string filename){
+bool ServerStore::hasAccess(string username, string fileOwner, string filename)
+{
     if(users.find(username) == users.end())
         return false;
     if(users.find(fileOwner) == users.end())
@@ -90,30 +123,67 @@ bool ServerStore::hasAccess(string username, string fileOwner, string filename){
 
 }
 
-int ServerStore::addEvent(string username, EventType type, Event& event){
-    if(users.find(username) == users.end())
-        return -3;
-    users[username].addEvent(type, event);
-    return 0;
-}
-
-History* ServerStore::getHistory(string username){
+History* ServerStore::getHistory(string username)
+{
     if(users.find(username) == users.end())
         return NULL;
     return users[username].getHistory();
 }
 
-int ServerStore::clearHistory(string username){
+int ServerStore::clearHistory(string username)
+{
     if(users.find(username) == users.end())
         return -1;
     users[username].clearHistory();
     return 0;
 }
 
-void ServerStore::clearAllHistory(){
-    typedef map<string, User>::iterator it_type;
+void ServerStore::clearAllHistory()
+{
     for(it_type it = users.begin(); it != users.end(); ++it)
     {
         it->second.clearHistory();
     }
+}
+
+void ServerStore::updateHistory(EventType type, string fileOwner, string filename)
+{
+    if(type==FILE_RENAMED || type==ACCESS_GRANTED || type==ACCESS_REVOKED){
+        cerr<<"Próba dodania do historii niepoprawnego eventu o typie "<<type<<endl;
+        return;
+    }
+    updateHistory(type, fileOwner, filename, "");
+}
+
+/**
+ *  Parametr secondary:
+ *  FILE_MODIFIED/REMOVED: secondary nieużywany
+ *  FILE_RENAMED: secondary - stara nazwa pliku
+ *  ACCESS_GRANTED/REVOKED: secondary - użytkownik, któremu przyznano/odebrano dostęp
+ */
+void ServerStore::updateHistory(EventType type, string fileOwner, string filename, string secondary)
+{
+    File* file = users[fileOwner].getFile(filename);
+    if(file==NULL){
+        cerr<<"Błąd dodawania zdarzenia: nie znaleziono pliku "<<filename<<endl;
+        return;
+    }
+    switch(type){
+    case FILE_MODIFIED: case FILE_REMOVED: case FILE_RENAMED:
+        for(it_type it = users.begin(); it != users.end(); ++it)
+        {
+            if(it->first!=fileOwner && it->second.hasAccess(file)){
+                Event event(filename, fileOwner, secondary);
+                it->second.addEvent(type, event);
+                cout<<"Dodano zdarzenie: "<<endl<<event.toString();
+            }
+        }
+        break;
+    case ACCESS_GRANTED: case ACCESS_REVOKED:
+        Event event(filename, fileOwner);
+        users[secondary].addEvent(type, event);
+        cout<<"Dodano zdarzenie: "<<endl<<event.toString();
+        break;
+    }
+
 }

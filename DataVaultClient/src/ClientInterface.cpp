@@ -319,7 +319,7 @@ bool ClientInterface::checkRegisterCommandCorectness()
 }
 
 /**
- *  Sprawdza czy wpisana komenda wyrejesterowania jest ok (jej parametry są prawidłowe).
+ *  Sprawdza czy wpisana komenda wyrejestrowania jest ok (jej parametry są prawidłowe).
  */
 bool ClientInterface::checkUnregisterCommandCorectness()
 {
@@ -426,7 +426,15 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                 }
                 case LOGIN:
                 {
-                    cout << "Poprawnie zalogowano do serwera " << ".\n";
+                    LoginResponse* loginResponse = (LoginResponse*) response;
+                    if(loginResponse!=NULL)
+                    {
+                        cout << "Poprawnie zalogowano do serwera.\n";
+                        int historySize = loginResponse->getHistory().size();
+                        cout << "Nowe powiadomienia: "<<historySize<<endl;
+                        printHistory(loginResponse->getHistory());
+                    }
+
                     break;
                 }
                 case LOGOUT:
@@ -441,7 +449,10 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                 }
                 case LIST:
                 {
-                    // tu trzeba będzie wylistować ładnie
+                    cout<<"Twoje pliki na serwerze: "<<response->getParameters().size()<<endl;
+                    for(unsigned int i=0; i<response->getParameters().size(); ++i){
+                        cout<<"  "<<response->getParameters()[i]<<endl;
+                    }
                     break;
                 }
                 case UPLOAD:
@@ -483,7 +494,7 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                     bool result;
                     for (unsigned int i = 1; i < message.getParameters().size(); ++i)
                     {
-                        cout << "Pobieranie pliku " << message.getParameters()[i] << "...\n";
+                        cout << "Pobieranie udostępnionego pliku " << message.getParameters()[i] << "...\n";
                         result = client.receiveFile(message.getParameters()[i], true);
                         if (!result)
                         {
@@ -603,6 +614,10 @@ void ClientInterface::connect()
         {
             cout << "Połączono z serwerem.\n";
         }
+        else
+        {
+            cout << "# BŁĄD: Nie można nawiązać połączenia z serwerem!\n";
+        }
     }
     else
     {
@@ -643,4 +658,37 @@ string ClientInterface::printParameters(vector<string>& parameters){
         }
     }
     return ss.str();
+}
+
+void ClientInterface::printHistory(History& history){
+    if(history.getEvents(ACCESS_GRANTED)->size()>0){
+        cout<<"Przyznano ci prawa dostępu do plików: "<<endl;
+        printEvents(*history.getEvents(ACCESS_GRANTED), ACCESS_GRANTED);
+    }
+    if(history.getEvents(ACCESS_REVOKED)->size()>0){
+        cout<<"Odebrano ci prawa dostępu do plików: "<<endl;
+        printEvents(*history.getEvents(ACCESS_REVOKED), ACCESS_REVOKED);
+    }
+    if(history.getEvents(FILE_MODIFIED)->size()>0){
+        cout<<"Zmodyfikowano śledzone przez ciebie pliki: "<<endl;
+        printEvents(*history.getEvents(FILE_MODIFIED), FILE_MODIFIED);
+    }
+    if(history.getEvents(FILE_REMOVED)->size()>0){
+        cout<<"Usunięto śledzone przez ciebie pliki: "<<endl;
+        printEvents(*history.getEvents(FILE_REMOVED), FILE_REMOVED);
+    }
+    if(history.getEvents(FILE_RENAMED)->size()>0){
+        cout<<"Zmieniono nazwę śledzonych przez ciebie plików: "<<endl;
+        printEvents(*history.getEvents(FILE_RENAMED), FILE_RENAMED);
+    }
+}
+
+void ClientInterface::printEvents(vector<Event>& events, EventType type){
+    for(unsigned int i=0; i<events.size(); ++i){
+        cout<<"  "<<events[i].getFilename();
+        if(type==FILE_RENAMED){
+            cout<<" przemianowany z "<<events[i].getSecondaryParameter();
+        }
+        cout<<" przez użytkownika "<<events[i].getUsername()<<endl;
+    }
 }

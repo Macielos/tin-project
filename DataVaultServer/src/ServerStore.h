@@ -62,12 +62,14 @@ class ServerStore
 
         bool hasAccess(string username, string fileOwner, string filename);
 
-        int addEvent(string username, EventType type, Event& event);
-
         History* getHistory(string username);
 
         int clearHistory(string username);
 
         void clearAllHistory();
+
+        void updateHistory(EventType type, string fileOwner, string filename);
+
+        void updateHistory(EventType type, string fileOwner, string oldName, string newName);
 
 };

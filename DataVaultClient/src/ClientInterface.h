@@ -36,5 +36,8 @@ class ClientInterface
         void processResponse(Action action, Response* response, Message& message);
         void connect();
         inline void showHelp();
+
         string printParameters(vector<string>& parameters);
+        void printHistory(History& history);
+        void printEvents(vector<Event>& events, EventType type);
 };
