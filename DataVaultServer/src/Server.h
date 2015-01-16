@@ -13,7 +13,6 @@
 #include "ServerStore.h"
 #include "../DataVaultAPI/src/FileTransferManager.h"
 #include "../DataVaultAPI/src/Message.h"
-#include "../DataVaultAPI/src/Response.h"
 
 
 using namespace std;
@@ -41,6 +40,7 @@ class Server
         string createResponse(Status status);
         string createResponse(Status status, string description);
         string createResponse(Status status, vector<string>& parameters);
+        string createResponse(Status status, History* history);
         template<typename T> string serialize(T& t);
         template<typename T> void deserialize(T& t, string serializedData);
 };

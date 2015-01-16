@@ -41,8 +41,14 @@
 		<Compiler>
 			<Add option="-Wall" />
 		</Compiler>
+		<Unit filename="../DataVaultAPI/src/Event.cpp" />
+		<Unit filename="../DataVaultAPI/src/Event.h" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.cpp" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
+		<Unit filename="../DataVaultAPI/src/History.cpp" />
+		<Unit filename="../DataVaultAPI/src/History.h" />
+		<Unit filename="../DataVaultAPI/src/LoginResponse.cpp" />
+		<Unit filename="../DataVaultAPI/src/LoginResponse.h" />
 		<Unit filename="../DataVaultAPI/src/Md5.cpp" />
 		<Unit filename="../DataVaultAPI/src/Md5.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
@@ -53,8 +59,6 @@
 		<Unit filename="src/Client.h" />
 		<Unit filename="src/ClientInterface.cpp" />
 		<Unit filename="src/ClientInterface.h" />
-		<Unit filename="src/ClientStore.cpp" />
-		<Unit filename="src/ClientStore.h" />
 		<Unit filename="src/main.cpp" />
 		<Extensions>
 			<code_completion />

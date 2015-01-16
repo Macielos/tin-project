@@ -16,6 +16,8 @@
 					<Add option="-g" />
 					<Add directory="../DataVaultAPI/" />
 					<Add directory="DataVaultAPI/src/" />
+					<Add directory="DataVaultServer/src/" />
+					<Add directory="DataVaultServer/src" />
 				</Compiler>
 				<Linker>
 					<Add option="-lboost_system -lboost_filesystem -lpthread -lboost_thread -lboost_serialization" />
@@ -32,6 +34,8 @@
 					<Add option="-O2" />
 					<Add directory="../DataVaultAPI/" />
 					<Add directory="DataVaultAPI/src/" />
+					<Add directory="DataVaultServer/src/" />
+					<Add directory="DataVaultServer/src" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
@@ -44,8 +48,14 @@
 			<Add option="-Wall" />
 		</Compiler>
 		<Unit filename="../DataVaultAPI/src/Constants.h" />
+		<Unit filename="../DataVaultAPI/src/Event.cpp" />
+		<Unit filename="../DataVaultAPI/src/Event.h" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.cpp" />
 		<Unit filename="../DataVaultAPI/src/FileTransferManager.h" />
+		<Unit filename="../DataVaultAPI/src/History.cpp" />
+		<Unit filename="../DataVaultAPI/src/History.h" />
+		<Unit filename="../DataVaultAPI/src/LoginResponse.cpp" />
+		<Unit filename="../DataVaultAPI/src/LoginResponse.h" />
 		<Unit filename="../DataVaultAPI/src/Message.cpp" />
 		<Unit filename="../DataVaultAPI/src/Message.h" />
 		<Unit filename="../DataVaultAPI/src/Response.cpp" />

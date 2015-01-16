@@ -84,6 +84,9 @@ bool Client::setNotificationPort(int notificationPort)
     }
 }
 
+void Client::setUserId(string userId){
+    this->userId = userId;
+}
 
 /*
     GETery flag.
@@ -103,9 +106,8 @@ bool Client::isLogged()
     return logged;
 }
 
-void Client::setLogged(bool loggedStatus)
-{
-    logged = loggedStatus;
+void Client::setLogged(bool logged){
+    this->logged = logged;
 }
 
 /**
@@ -149,21 +151,24 @@ bool Client::connect()
             endpoint = *destination++;
         }
 
+        tcp::socket socket(ioService);
+        socket.connect(endpoint);
+
         connected = true;
         return true;
     }
     catch (boost::system::system_error err)
     {
-        cout << "# BŁĄD: Nie można nawiązać połączenia z serwerem!\n";
+        cout<<"error"<<endl;
+        return false;
     }
-    return false;
+
 }
 
 Response* Client::sendMessage(Message& message)
 {
     boost::array<char, 128> responseBuffer;
     boost::system::error_code error;
-    Response* response = new Response();
 
     // otwarcie gniazda
     socket.connect(endpoint);
@@ -177,14 +182,22 @@ Response* Client::sendMessage(Message& message)
     if (error)
     {
         cerr<<error<<endl;
+        return NULL;
+    }
+
+    if(message.getAction()==LOGIN){
+        LoginResponse* loginResponse = new LoginResponse();
+        deserialize(*loginResponse, responseBuffer.data());
+        socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+        socket.close();
+        return loginResponse;
+    }else{
+        Response* response = new Response();
+        deserialize(*response, responseBuffer.data());
+        socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
+        socket.close();
         return response;
     }
-    deserialize(*response, responseBuffer.data());
-
-    //zamknięcie gniazda
-    socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
-    socket.close();
-    return response;
 }
 
 bool Client::sendFile(string filename, bool notify)
