@@ -15,20 +15,25 @@ enum Status
     // ogólnego przeznaczenia
     OK,
     WRONG_SYNTAX,
+    NOT_IMPLEMENTED,
     // LOGIN | UNREGISTER
     INCORRECT_LOGIN,
     INCORRECT_PASSWORD,
     // REGISTER
     USERNAME_USED,
-    // DOWNLOAD | REMOVE | RENAME
+    // DOWNLOAD | REMOVE | RENAME | GIVE_ACCESS | REVOKE_ACCESS
     NO_SUCH_FILE,
+    // DOWNLOAD | REMOVE | RENAME
     ACCESS_DENIED,
-    // UPLOAD
+    // RENAME
     FILE_EXISTS,
     // GIVE_ACCESS | REVOKE_ACCESS
-    //    (w sumie tutaj INCORRECT_LOGIN i NO_SUCH_FILE)
-    // inne
-    NOT_IMPLEMENTED
+    NO_SUCH_USER,
+    OWN_FILE,
+    // GIVE_ACCESS
+    ALREADY_HAVE_ACCESS,
+    // REVOKE_ACCESS
+    ALREADY_NO_ACCESS
 };
 
 class Response

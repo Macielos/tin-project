@@ -4,7 +4,6 @@ using namespace std;
 
 File::File()
 {
-
 }
 
 File::File(string filename)
@@ -27,3 +26,4 @@ void File::setFilename(string filename)
 {
     this->filename = filename;
 }
+

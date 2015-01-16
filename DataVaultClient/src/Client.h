@@ -17,10 +17,9 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/exception/diagnostic_information.hpp>
 
-#include "ClientStore.h"
 #include "../DataVaultAPI/src/FileTransferManager.h"
 #include "../DataVaultAPI/src/Message.h"
-#include "../DataVaultAPI/src/Response.h"
+#include "../DataVaultAPI/src/LoginResponse.h"
 #include "../DataVaultAPI/src/Md5.h"
 
 using namespace std;
@@ -28,8 +27,6 @@ using boost::asio::ip::tcp;
 
 class Client
 {
-    private:
-        ClientStore clientStore;
         FileTransferManager fileTransferManager;
 
         string host;
@@ -57,6 +54,9 @@ class Client
         bool setMessagePort(int messagePort);
         bool setDataPort(int dataPort);
         bool setNotificationPort(int notificationPort);
+
+        void setUserId(string userId);
+        void setLogged(bool logged);
 
         bool isValidParameters();
         bool isConnected();

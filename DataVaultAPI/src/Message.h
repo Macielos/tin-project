@@ -10,7 +10,7 @@ using namespace std;
 /**
  *  Działanie zlecane serwerowi przez klienta
  */
-enum Action {REGISTER, LOGIN, LOGOUT, UNREGISTER, LIST, UPLOAD, DOWNLOAD, REMOVE, RENAME, GIVE_ACCESS, REVOKE_ACCESS};
+enum Action {REGISTER, LOGIN, LOGOUT, UNREGISTER, LIST, UPLOAD, DOWNLOAD, DOWNLOAD_SHARED, REMOVE, RENAME, GIVE_ACCESS, REVOKE_ACCESS};
 
 class Message
 {

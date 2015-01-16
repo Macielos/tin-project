@@ -93,7 +93,7 @@
 1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Message.cpp
 	"Message.h"
 
-1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Message.h
+1421239260 /home/maciek/workspace/tin-project/DataVaultAPI/src/Message.h
 	<vector>
 	<string>
 	<sstream>
@@ -102,16 +102,16 @@
 
 1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Constants.h
 
-1420891217 source:/home/maciek/workspace/tin-project/DataVaultClient/src/ClientInterface.cpp
+1421369810 source:/home/maciek/workspace/tin-project/DataVaultClient/src/ClientInterface.cpp
 	"ClientInterface.h"
 
-1420891217 /home/maciek/workspace/tin-project/DataVaultClient/src/ClientInterface.h
+1421364603 /home/maciek/workspace/tin-project/DataVaultClient/src/ClientInterface.h
 	"Client.h"
 	<algorithm>
 	<boost/algorithm/string/split.hpp>
 	<boost/algorithm/string/classification.hpp>
 
-1420891217 /home/maciek/workspace/tin-project/DataVaultClient/src/Client.h
+1421370538 /home/maciek/workspace/tin-project/DataVaultClient/src/Client.h
 	<boost/archive/text_oarchive.hpp>
 	<boost/archive/text_iarchive.hpp>
 	<boost/array.hpp>
@@ -120,10 +120,9 @@
 	<boost/bind.hpp>
 	<boost/lexical_cast.hpp>
 	<boost/exception/diagnostic_information.hpp>
-	"ClientStore.h"
 	"../DataVaultAPI/src/FileTransferManager.h"
 	"../DataVaultAPI/src/Message.h"
-	"../DataVaultAPI/src/Response.h"
+	"../DataVaultAPI/src/LoginResponse.h"
 	"../DataVaultAPI/src/Md5.h"
 
 1418935617 /home/maciek/workspace/tin-project/DataVaultClient/src/ClientStore.h
@@ -142,7 +141,7 @@
 1418935617 source:/home/maciek/workspace/tin-project/DataVaultClient/src/ClientStore.cpp
 	"ClientStore.h"
 
-1420891217 source:/home/maciek/workspace/tin-project/DataVaultClient/src/main.cpp
+1421281195 source:/home/maciek/workspace/tin-project/DataVaultClient/src/main.cpp
 	<iostream>
 	<boost/array.hpp>
 	<boost/asio.hpp>
@@ -150,7 +149,7 @@
 	<boost/bind.hpp>
 	"ClientInterface.h"
 
-1420891217 source:/home/maciek/workspace/tin-project/DataVaultClient/src/Client.cpp
+1421363925 source:/home/maciek/workspace/tin-project/DataVaultClient/src/Client.cpp
 	"Client.h"
 
 1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/FileTransferManager.cpp
@@ -194,7 +193,7 @@
 1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Response.cpp
 	"Response.h"
 
-1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Response.h
+1421239260 /home/maciek/workspace/tin-project/DataVaultAPI/src/Response.h
 	<vector>
 	<string>
 	<sstream>
@@ -204,4 +203,31 @@
 1420891217 /home/maciek/workspace/tin-project/DataVaultAPI/src/Md5.h
 	<cstring>
 	<iostream>
+
+1420891217 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Md5.cpp
+	"Md5.h"
+	<cstdio>
+
+1421283700 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/Event.cpp
+	"Event.h"
+
+1421280059 /home/maciek/workspace/tin-project/DataVaultAPI/src/Event.h
+	<string>
+	<boost/date_time/posix_time/posix_time.hpp>
+	<boost/serialization/string.hpp>
+
+1421277937 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/History.cpp
+	"History.h"
+
+1421277943 /home/maciek/workspace/tin-project/DataVaultAPI/src/History.h
+	<vector>
+	<boost/serialization/vector.hpp>
+	"Event.h"
+
+1421277526 /home/maciek/workspace/tin-project/DataVaultAPI/src/LoginResponse.h
+	<../DataVaultAPI/src/Response.h>
+	<../DataVaultAPI/src/History.h>
+
+1421272524 source:/home/maciek/workspace/tin-project/DataVaultAPI/src/LoginResponse.cpp
+	"LoginResponse.h"
 

@@ -5,6 +5,8 @@ using namespace std;
 
 class File
 {
+        string filename;
+
     public:
         File();
         File(string filename);
@@ -12,6 +14,4 @@ class File
         string getFilename();
         void setFilename(string filename);
 
-    private:
-        string filename;
 };

@@ -17,14 +17,30 @@ User::User(string username)
     this->username = username;
 }
 
+User::User(string username, string passwordHash)
+{
+    this->username = username;
+    this->passwordHash = passwordHash;
+}
+
 string User::getUsername()
 {
     return this->username;
 }
 
+string User::getPasswordHash()
+{
+    return this->passwordHash;
+}
+
 void User::setUsername(string username)
 {
     this->username = username;
+}
+
+void User::setPasswordHash(string passwordHash)
+{
+    this->passwordHash = passwordHash;
 }
 
 vector<string> User::getFilelist()
@@ -79,3 +95,73 @@ int User::rename(string oldname, string newname)
 bool User::fileExists(string filename){
     return files.find(filename) != files.end();
 }
+
+File* User::getFile(string filename){
+    if(files.find(filename) == files.end()){
+        return NULL;
+    }
+    return &files[filename];
+}
+
+void User::deleteFiles(){
+    sharedFiles.clear();
+    files.clear();
+}
+
+int User::giveAccess(File* file)
+{
+    if(fileExists(file->getFilename())){
+        return -5;
+    }
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        if(*it == file){
+            return -4;
+        }
+    }
+    sharedFiles.push_back(file);
+    return 0;
+}
+
+int User::revokeAccess(File* file)
+{
+    if(fileExists(file->getFilename())){
+        return -5;
+    }
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        if(*it == file){
+            sharedFiles.erase(it);
+            return 0;
+        }
+    }
+    return -4;
+}
+
+void User::clearAccessRights()
+{
+    sharedFiles.clear();
+}
+
+bool User::hasAccess(File* file){
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        if(*it == file){
+            return true;
+        }
+    }
+    return false;
+}
+
+void User::addEvent(EventType type, Event& event){
+    history.addEvent(type, event);
+}
+
+History* User::getHistory(){
+    return &history;
+}
+void User::clearHistory(){
+    history.clearHistory();
+}
+
+

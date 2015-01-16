@@ -191,6 +191,11 @@ bool ClientInterface::interpretCommand(string commandLine)
     {
         followTaskOnServer(DOWNLOAD);
     }
+    // DOWNLOAD SHARED
+    else if (c == "download_shared")
+    {
+        followTaskOnServer(DOWNLOAD_SHARED);
+    }
     // REMOVE
     else if (c == "remove")
     {
@@ -257,7 +262,7 @@ inline bool ClientInterface::checkFileExist (const string& name)
  *  Kiedy plik nie będzie istniał wypisze komunikat i usunie nazwę z wektora i będzie kontynuował sprawdzanie.
  *  Zwraca ilość niepoprawnych nazw.
  */
-unsigned int ClientInterface::checkFilenamesCorectness()
+unsigned int ClientInterface::checkFilenamesCorrectness()
 {
     unsigned int incorrect = 0;
     for (unsigned int i = 0; i < command.size(); i++) // pętla po nazwach plików
@@ -279,40 +284,9 @@ unsigned int ClientInterface::checkFilenamesCorectness()
 }
 
 /**
- *  Sprawdza czy wpisana komenda rejesteracji jest ok (jej parametry są prawidłowe).
+ *  Sprawdza czy wpisana komenda wyrejestrowania jest ok (jej parametry są prawidłowe).
  */
-bool ClientInterface::checkRegisterCommandCorectness()
-{
-    if (command.size() >= 3)
-    {
-        if (command[0].length() < 3)
-        {
-            cout << "# BŁĄD: Nazwa użytkownika musi składać się przynajmniej z 3 znaków!\n";
-            return false;
-        }
-        else if (command[1] != command[2])
-        {
-            cout << "# BŁĄD: Podane hasła różnią się!\n";
-            return false;
-        }
-        else if ( (command[1].length() == 0) || (command[2].length() == 0) )
-        {
-            cout << "# BŁĄD: Hasło musi składać się przynajmniej z 1 znaku!\n";
-            return false;
-        }
-    }
-    else
-    {
-        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło] [powtórzone hasło]\n";
-        return false;
-    }
-    return true;
-}
-
-/**
- *  Sprawdza czy wpisana komenda wyrejesterowania jest ok (jej parametry są prawidłowe).
- */
-bool ClientInterface::checkUnregisterCommandCorectness()
+bool ClientInterface::checkCommandCorrectness()
 {
     if (command.size() >= 2)
     {
@@ -321,7 +295,7 @@ bool ClientInterface::checkUnregisterCommandCorectness()
             cout << "# BŁĄD: Nazwa użytkownika musi składać się przynajmniej z 3 znaków!\n";
             return false;
         }
-        else if (command[1].length() == 0)
+        else if ( command[1].length() == 0 )
         {
             cout << "# BŁĄD: Hasło musi składać się przynajmniej z 1 znaku!\n";
             return false;
@@ -329,7 +303,7 @@ bool ClientInterface::checkUnregisterCommandCorectness()
     }
     else
     {
-        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło]\n";
+        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło] \n";
         return false;
     }
     return true;
@@ -348,41 +322,49 @@ void ClientInterface::followTaskOnServer(Action action)
                 && action != LOGIN
                 && action != UNREGISTER )
         {
-            cout << "# BŁĄD: Nie jesteś zalogowany aby móc wykonać tę akcję! Użyj polecenia login [nazwa użytkownika] [hasło]\n";
+            cout << "# BŁĄD: Musisz być zalogowany, aby móc wykonać tę akcję! Użyj polecenia login [nazwa użytkownika] [hasło]\n";
+        }
+        else if ( action == REGISTER && client.isLogged() )
+        {
+            cout << "# BŁĄD: Wyloguj się, aby zarejestrowac nowego użytkownika\n";
+        }
+        else if ( action == LOGIN && client.isLogged() )
+        {
+            cout << "# BŁĄD: Jesteś juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj się.\n";
         }
         else
         {
             if (action == UPLOAD)
             {
-                checkFilenamesCorectness();
+                checkFilenamesCorrectness();
                 if (command.size() == 0)
                 {
                     return;
                 }
             }
-            else if (action == REGISTER)
+            else if (action == REGISTER || action == UNREGISTER || action == LOGIN)
             {
-                if (checkRegisterCommandCorectness())
+                    if (checkCommandCorrectness())
+                    {
+                        command[1] = md5(command[1]); // zmieniamy hasło na jego hash
+                        command.resize(2); // zostawiamy tylko login i hash
+                    }
+                    else
+                    {
+                        return;
+                    }
+            }
+            else if (action == LOGOUT)
+            {
+                if(!client.isLogged())
                 {
-                    command[1] = md5(command[1]); // zmieniamy hasło na jego hash
-                    command.resize(2); // zostawiamy tylko login i hash
-                }
-                else
-                {
+                    cout << "Polecenie dziala po zalogowaniu.\n";
                     return;
                 }
             }
-            else if (action == UNREGISTER)
-            {
-                if (checkUnregisterCommandCorectness())
-                {
-                    command[1] = md5(command[1]); // zmieniamy hasło na jego hash
-                    command.resize(2); // zostawiamy tylko login i hash
-                }
-                else
-                {
-                    return;
-                }
+
+            if(action == REGISTER || action == LOGIN){
+                client.setUserId(command[0]);
             }
 
             Message message(action, command);
@@ -417,11 +399,26 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                 }
                 case LOGIN:
                 {
-                    cout << "Poprawnie zalogowano do serwera " << ".\n";
+                    LoginResponse* loginResponse = (LoginResponse*) response;
+                    if(loginResponse!=NULL)
+                    {
+                        client.setLogged(true);
+                        cout << "Poprawnie zalogowano do serwera.\n";
+                        int historySize = loginResponse->getHistory().size();
+                        cout << "Nowe powiadomienia: "<<historySize<<endl;
+                        if(historySize>0)
+                        {
+                            printHistory(loginResponse->getHistory());
+                        }
+                    }else{
+                        cout << "# BŁĄD: Po stronie serwera wystąpił błąd podczas logowania.\n";
+                    }
+
                     break;
                 }
                 case LOGOUT:
                 {
+                    client.setLogged(false);
                     cout << "Wylogowano z serwera.\n";
                     break;
                 }
@@ -432,7 +429,10 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                 }
                 case LIST:
                 {
-                    // tu trzeba będzie wylistować ładnie
+                    cout<<"Twoje pliki na serwerze: "<<response->getParameters().size()<<endl;
+                    for(unsigned int i=0; i<response->getParameters().size(); ++i){
+                        cout<<"  "<<response->getParameters()[i]<<endl;
+                    }
                     break;
                 }
                 case UPLOAD:
@@ -469,47 +469,82 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                     }
                     break;
                 }
+                case DOWNLOAD_SHARED:
+                {
+                    bool result;
+                    for (unsigned int i = 1; i < message.getParameters().size(); ++i)
+                    {
+                        cout << "Pobieranie udostępnionego pliku " << message.getParameters()[i] << "...\n";
+                        result = client.receiveFile(message.getParameters()[i], true);
+                        if (!result)
+                        {
+                            cout << "# BŁĄD: Nie udało się pobrać pliku!\n";
+                            break;
+                        }
+                    }
+                    break;
+                }
                 case REMOVE:
                 {
-                    cout << "Plik " << "[nazwa pliku]" << " został usunięty z serwera.\n";
+                    cout << "Pliki zostały usunięte z serwera.\n";
                     break;
                 }
                 case RENAME:
                 {
-                    cout << "Pomyślnie zmieniono nazwę pliku na serwera.\n";
+                    cout << "Pomyślnie zmieniono nazwę pliku na serwerze.\n";
                     break;
                 }
                 case GIVE_ACCESS:
                 {
-                    cout << "Przyznano uprawnienia dostępu do pliku " << " dla użytkownika " << "[login]" << ".\n";
+                    cout << "Przyznano uprawnienia dostępu do plików dla użytkownika " << message.getParameters()[0] << ".\n";
                     break;
                 }
                 case REVOKE_ACCESS:
                 {
-                    cout << "Uprawnienia dostępu do tego pliku zostały cofnięte użytkownikowi " << "[login]" << ".n";
+                    cout << "Uprawnienia dostępu do plików zostały cofnięte użytkownikowi " << message.getParameters()[0] << ".n";
                     break;
                 }
             }
             break;
         }
-        case WRONG_SYNTAX: // co tu ma być? kiedy jest taki response?!
+        case WRONG_SYNTAX:
         {
-            cout << "# BŁĄD: Wrong SYNTAX error.\n";
+            cout << "# BŁĄD: Niepoprawne polecenie lub liczba argumentów.\n";
             break;
         }
         case FILE_EXISTS:
         {
-            cout << "Plik o podanej nazwie istnieje już na serwerze.\n";
+            cout << "# BŁĄD: Plik o podanej nowej nazwie istnieje już na serwerze.\n";
             break;
         }
         case NO_SUCH_FILE:
         {
-            cout << "Plik o podanej nazwie nie istnieje na serwerze.\n";
+            cout << "# BŁĄD: Pliki o podanych nazwach nie istnieją na serwerze.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case NO_SUCH_USER:
+        {
+            cout << "# BŁĄD: Użytkownik o podanej nazwie nie jest zarejestrowany na serwerze.\n";
             break;
         }
         case ACCESS_DENIED:
         {
-            cout << "Nie masz dostępu do tego pliku.\n";
+            cout << "# BŁĄD: Odmówiono dostępu do podanych plików.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case ALREADY_HAVE_ACCESS:
+        {
+            cout << "# BŁĄD: Działanie bez efektu. Użytkownik ma już dostęp do podanych plików.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case ALREADY_NO_ACCESS:
+        {
+            cout << "# BŁĄD: Działanie bez efektu. Użytkownik nie ma dostępu do podanych plików.\n" << printParameters(response->getParameters()) << endl;
+            break;
+        }
+        case OWN_FILE:
+        {
+            cout << "# BŁĄD: Próba przyznania/odebrania samemu sobie dostępu do własnego pliku. Interesująca, acz pozbawiona sensu.\n" << printParameters(response->getParameters()) << endl;
             break;
         }
         case INCORRECT_LOGIN:
@@ -559,6 +594,10 @@ void ClientInterface::connect()
         {
             cout << "Połączono z serwerem.\n";
         }
+        else
+        {
+            cout << "# BŁĄD: Nie można nawiązać połączenia z serwerem!\n";
+        }
     }
     else
     {
@@ -588,4 +627,51 @@ inline void ClientInterface::showHelp()
          << "  help         - pokazuje tę pomoc\n"
          << "  exit/quit    - wchodzi z programu\n"
          << endl;
+}
+
+string ClientInterface::printParameters(vector<string>& parameters)
+{
+    stringstream ss;
+    for(unsigned int i=0; i<parameters.size(); ++i){
+        ss << parameters[i];
+        if(i!=parameters.size()-1){
+            ss << " ";
+        }
+    }
+    return ss.str();
+}
+
+void ClientInterface::printHistory(History& history)
+{
+    if(history.getEvents(ACCESS_GRANTED)->size()>0){
+        cout<<"Przyznano ci prawa dostępu do plików: "<<endl;
+        printEvents(*history.getEvents(ACCESS_GRANTED), ACCESS_GRANTED);
+    }
+    if(history.getEvents(ACCESS_REVOKED)->size()>0){
+        cout<<"Odebrano ci prawa dostępu do plików: "<<endl;
+        printEvents(*history.getEvents(ACCESS_REVOKED), ACCESS_REVOKED);
+    }
+    if(history.getEvents(FILE_MODIFIED)->size()>0){
+        cout<<"Zmodyfikowano śledzone przez ciebie pliki: "<<endl;
+        printEvents(*history.getEvents(FILE_MODIFIED), FILE_MODIFIED);
+    }
+    if(history.getEvents(FILE_REMOVED)->size()>0){
+        cout<<"Usunięto śledzone przez ciebie pliki: "<<endl;
+        printEvents(*history.getEvents(FILE_REMOVED), FILE_REMOVED);
+    }
+    if(history.getEvents(FILE_RENAMED)->size()>0){
+        cout<<"Zmieniono nazwę śledzonych przez ciebie plików: "<<endl;
+        printEvents(*history.getEvents(FILE_RENAMED), FILE_RENAMED);
+    }
+}
+
+void ClientInterface::printEvents(vector<Event>& events, EventType type)
+{
+    for(unsigned int i=0; i<events.size(); ++i){
+        cout<<"  "<<events[i].getFilename();
+        if(type==FILE_RENAMED){
+            cout<<" przemianowany z "<<events[i].getSecondaryParameter();
+        }
+        cout<<" przez użytkownika "<<events[i].getUsername()<<endl;
+    }
 }
