@@ -1,7 +1,9 @@
-#include "User.h"
 #include <vector>
 #include <string>
 #include <map>
+#include <fstream>
+
+#include "User.h"
 
 using namespace std;
 
@@ -38,10 +40,6 @@ class ServerStore
         */
         int rename(string username, string oldname, string newname);
 
-        bool fileExists(string username, string filename);
-
-        bool userExists(string username);
-
         /**
         zwraca 0 jak się udało
         zwraca -2 jak brak pliku
@@ -62,6 +60,32 @@ class ServerStore
 
         bool hasAccess(string username, string fileOwner, string filename);
 
+        /**
+        zwraca 0 jak się udało
+        zwraca -1 jak nazwa użytkownika już zajęta
+        */
+        int registerUser(string username, string hash);
+
+        /**
+        zwraca 0 jak się udało
+        zwraca -1 jak brak usera
+        zwraca -2 jak błędny hash
+        */
+        int unregisterUser(string username, string hash);
+
+        /**
+        zwraca 0 jak się udało
+        zwraca -1 jak brak usera
+        zwraca -2 jak błędny hash
+        */
+        int loginUser(string username, string hash);
+
+        bool userExists(string username);
+
+        bool fileExists(string username, string filename);
+
+        bool loginFileExists(string filename);
+
         History* getHistory(string username);
 
         int clearHistory(string username);
@@ -71,5 +95,7 @@ class ServerStore
         void updateHistory(EventType type, string fileOwner, string filename);
 
         void updateHistory(EventType type, string fileOwner, string oldName, string newName);
+
+
 
 };

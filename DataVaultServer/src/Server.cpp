@@ -51,21 +51,103 @@ void Server::handleMessage(tcp::socket* socket){
     cout<<"Otrzymano wiadomość: "<<endl;
     cout<<message.toString()<<endl;
 
-    bool result;
+    int result;
     string response;
+    History emptyHistory;
     vector<string> mismatchingParameters;
 
+    History* history;
+
     switch(message.getAction()){
+        case REGISTER:
+        {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // tworzymy użyszkodnika
+                result = serverStore.registerUser(message.getParameters()[0], message.getParameters()[1]);
+                switch (result)
+                {
+                    case 0: // użytkownik dodany poprawnie
+                        response = createResponse(OK);
+                        break;
+                    case -1: // login zajęty
+                        response = createResponse(INCORRECT_LOGIN);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            break;
+        }
         case LOGIN:
-            response = createResponse(OK, serverStore.getHistory(message.getUserId()));
-            serverStore.clearHistory(message.getUserId());
+        {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // logowanie użyszkodnika
+                result = serverStore.loginUser(message.getParameters()[0], message.getParameters()[1]);
+
+                switch (result)
+                {
+                    case 0: // użytkownik zalogowany poprawnie
+                        history = serverStore.getHistory(message.getUserId());
+                        cout<<(history==NULL)<<endl;
+                        response = createResponse(OK, history);
+                        cout<<(history==NULL)<<endl;
+                        serverStore.clearHistory(message.getUserId());
+                        break;
+                    case -1: // niepoprawny login
+                        response = createResponse(INCORRECT_LOGIN, &emptyHistory);
+                        break;
+                    case -2: // niepoprawne haslo
+                        response = createResponse(INCORRECT_PASSWORD, &emptyHistory);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            break;
+        }
+        case LOGOUT:
+        {
+            response = createResponse(OK);
             socket->write_some(boost::asio::buffer(response), error);
             break;
-        case REGISTER: case LOGOUT: case UNREGISTER:
-            //TODO
-            response = createResponse(NOT_IMPLEMENTED);
-            socket->write_some(boost::asio::buffer(response), error);
+        }
+        case UNREGISTER:
+        {
+            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            {
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+            }
+            else
+            {
+                // usuwamy użyszkodnika
+                result = serverStore.unregisterUser(message.getParameters()[0], message.getParameters()[1]);
+                switch (result)
+                {
+                    case 0: // użytkownik usunięty poprawnie
+                        response = createResponse(OK);
+                        break;
+                    case -1: // login błędny
+                        response = createResponse(INCORRECT_LOGIN);
+                        break;
+                    case -2: // hasło błędne
+                        response = createResponse(INCORRECT_PASSWORD);
+                        break;
+                }
+                socket->write_some(boost::asio::buffer(response), error);
+            }
             break;
+        }
         case LIST:
         {
             //jeśli podano parametry - błąd
@@ -344,8 +426,6 @@ void Server::handleMessage(tcp::socket* socket){
             response = createResponse(WRONG_SYNTAX);
             socket->write_some(boost::asio::buffer(response), error);
     }
-    cout<<"History: "<<serverStore.getHistory(message.getUserId())->size()<<endl;
-    cout<<"User exists: "<<serverStore.userExists(message.getUserId())<<endl;
     socket->close();
     delete socket;
 }
@@ -370,7 +450,9 @@ string Server::createResponse(Status status, vector<string>& parameters){
 
 string Server::createResponse(Status status, History* history){
     LoginResponse response(status);
-    response.setHistory(history);
+    if(history!=NULL){
+        response.setHistory(history);
+    }
     cout<<"Login response: "<<response.toString()<<endl;
     return serialize(response);
 }

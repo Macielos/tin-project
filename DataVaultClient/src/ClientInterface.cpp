@@ -148,10 +148,6 @@ bool ClientInterface::interpretCommand(string commandLine)
         {
             changeParameter(NOTIFICATION_PORT, command[1]);
         }
-        else if (c_t == "name")
-        {
-            client.setUserId(command[1]);
-        }
         else
         {
             cout << "# BŁĄD: Nie rozpoznano parametru '" << c_t << "'!\n";
@@ -266,7 +262,7 @@ inline bool ClientInterface::checkFileExist (const string& name)
  *  Kiedy plik nie będzie istniał wypisze komunikat i usunie nazwę z wektora i będzie kontynuował sprawdzanie.
  *  Zwraca ilość niepoprawnych nazw.
  */
-unsigned int ClientInterface::checkFilenamesCorectness()
+unsigned int ClientInterface::checkFilenamesCorrectness()
 {
     unsigned int incorrect = 0;
     for (unsigned int i = 0; i < command.size(); i++) // pętla po nazwach plików
@@ -288,40 +284,9 @@ unsigned int ClientInterface::checkFilenamesCorectness()
 }
 
 /**
- *  Sprawdza czy wpisana komenda rejesteracji jest ok (jej parametry są prawidłowe).
- */
-bool ClientInterface::checkRegisterCommandCorectness()
-{
-    if (command.size() >= 3)
-    {
-        if (command[0].length() < 3)
-        {
-            cout << "# BŁĄD: Nazwa użytkownika musi składać się przynajmniej z 3 znaków!\n";
-            return false;
-        }
-        else if (command[1] != command[2])
-        {
-            cout << "# BŁĄD: Podane hasła różnią się!\n";
-            return false;
-        }
-        else if ( (command[1].length() == 0) || (command[2].length() == 0) )
-        {
-            cout << "# BŁĄD: Hasło musi składać się przynajmniej z 1 znaku!\n";
-            return false;
-        }
-    }
-    else
-    {
-        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło] [powtórzone hasło]\n";
-        return false;
-    }
-    return true;
-}
-
-/**
  *  Sprawdza czy wpisana komenda wyrejestrowania jest ok (jej parametry są prawidłowe).
  */
-bool ClientInterface::checkUnregisterCommandCorectness()
+bool ClientInterface::checkCommandCorrectness()
 {
     if (command.size() >= 2)
     {
@@ -330,7 +295,7 @@ bool ClientInterface::checkUnregisterCommandCorectness()
             cout << "# BŁĄD: Nazwa użytkownika musi składać się przynajmniej z 3 znaków!\n";
             return false;
         }
-        else if (command[1].length() == 0)
+        else if ( command[1].length() == 0 )
         {
             cout << "# BŁĄD: Hasło musi składać się przynajmniej z 1 znaku!\n";
             return false;
@@ -338,7 +303,7 @@ bool ClientInterface::checkUnregisterCommandCorectness()
     }
     else
     {
-        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło]\n";
+        cout << "# BŁĄD: Komenda niepełna! Poprawna składnia: [nazwa użytkownika] [hasło] \n";
         return false;
     }
     return true;
@@ -357,41 +322,49 @@ void ClientInterface::followTaskOnServer(Action action)
                 && action != LOGIN
                 && action != UNREGISTER )
         {
-            cout << "# BŁĄD: Nie jesteś zalogowany aby móc wykonać tę akcję! Użyj polecenia login [nazwa użytkownika] [hasło]\n";
+            cout << "# BŁĄD: Musisz być zalogowany, aby móc wykonać tę akcję! Użyj polecenia login [nazwa użytkownika] [hasło]\n";
+        }
+        else if ( action == REGISTER && client.isLogged() )
+        {
+            cout << "# BŁĄD: Wyloguj się, aby zarejestrowac nowego użytkownika\n";
+        }
+        else if ( action == LOGIN && client.isLogged() )
+        {
+            cout << "# BŁĄD: Jesteś juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj się.\n";
         }
         else
         {
             if (action == UPLOAD)
             {
-                checkFilenamesCorectness();
+                checkFilenamesCorrectness();
                 if (command.size() == 0)
                 {
                     return;
                 }
             }
-            else if (action == REGISTER)
+            else if (action == REGISTER || action == UNREGISTER || action == LOGIN)
             {
-                if (checkRegisterCommandCorectness())
+                    if (checkCommandCorrectness())
+                    {
+                        command[1] = md5(command[1]); // zmieniamy hasło na jego hash
+                        command.resize(2); // zostawiamy tylko login i hash
+                    }
+                    else
+                    {
+                        return;
+                    }
+            }
+            else if (action == LOGOUT)
+            {
+                if(!client.isLogged())
                 {
-                    command[1] = md5(command[1]); // zmieniamy hasło na jego hash
-                    command.resize(2); // zostawiamy tylko login i hash
-                }
-                else
-                {
+                    cout << "Polecenie dziala po zalogowaniu.\n";
                     return;
                 }
             }
-            else if (action == UNREGISTER)
-            {
-                if (checkUnregisterCommandCorectness())
-                {
-                    command[1] = md5(command[1]); // zmieniamy hasło na jego hash
-                    command.resize(2); // zostawiamy tylko login i hash
-                }
-                else
-                {
-                    return;
-                }
+
+            if(action == REGISTER || action == LOGIN){
+                client.setUserId(command[0]);
             }
 
             Message message(action, command);
@@ -429,16 +402,23 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                     LoginResponse* loginResponse = (LoginResponse*) response;
                     if(loginResponse!=NULL)
                     {
+                        client.setLogged(true);
                         cout << "Poprawnie zalogowano do serwera.\n";
                         int historySize = loginResponse->getHistory().size();
                         cout << "Nowe powiadomienia: "<<historySize<<endl;
-                        printHistory(loginResponse->getHistory());
+                        if(historySize>0)
+                        {
+                            printHistory(loginResponse->getHistory());
+                        }
+                    }else{
+                        cout << "# BŁĄD: Po stronie serwera wystąpił błąd podczas logowania.\n";
                     }
 
                     break;
                 }
                 case LOGOUT:
                 {
+                    client.setLogged(false);
                     cout << "Wylogowano z serwera.\n";
                     break;
                 }
@@ -649,7 +629,8 @@ inline void ClientInterface::showHelp()
          << endl;
 }
 
-string ClientInterface::printParameters(vector<string>& parameters){
+string ClientInterface::printParameters(vector<string>& parameters)
+{
     stringstream ss;
     for(unsigned int i=0; i<parameters.size(); ++i){
         ss << parameters[i];
@@ -660,7 +641,8 @@ string ClientInterface::printParameters(vector<string>& parameters){
     return ss.str();
 }
 
-void ClientInterface::printHistory(History& history){
+void ClientInterface::printHistory(History& history)
+{
     if(history.getEvents(ACCESS_GRANTED)->size()>0){
         cout<<"Przyznano ci prawa dostępu do plików: "<<endl;
         printEvents(*history.getEvents(ACCESS_GRANTED), ACCESS_GRANTED);
@@ -683,7 +665,8 @@ void ClientInterface::printHistory(History& history){
     }
 }
 
-void ClientInterface::printEvents(vector<Event>& events, EventType type){
+void ClientInterface::printEvents(vector<Event>& events, EventType type)
+{
     for(unsigned int i=0; i<events.size(); ++i){
         cout<<"  "<<events[i].getFilename();
         if(type==FILE_RENAMED){

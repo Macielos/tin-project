@@ -56,6 +56,7 @@ class Client
         bool setNotificationPort(int notificationPort);
 
         void setUserId(string userId);
+        void setLogged(bool logged);
 
         bool isValidParameters();
         bool isConnected();

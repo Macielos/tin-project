@@ -6,12 +6,7 @@ typedef map<string, User>::iterator it_type;
 
 ServerStore::ServerStore()
 {
-    User user;
-    user.setUsername("user123");
-    users.insert(make_pair(user.getUsername(), user));
-    User user2;
-    user2.setUsername("user456");
-    users.insert(make_pair(user2.getUsername(), user2));
+
 }
 
 ServerStore::~ServerStore()
@@ -74,18 +69,6 @@ int ServerStore::rename(string username, string oldname, string newname)
     return result;
 }
 
-bool ServerStore::fileExists(string username, string filename)
-{
-    if(users.find(username) == users.end())
-        return false;
-    return users[username].fileExists(filename);
-}
-
-bool ServerStore::userExists(string username)
-{
-    return users.find(username) != users.end();
-}
-
 int ServerStore::giveAccess(string fileOwner, string requestTarget, string filename)
 {
     if(users.find(fileOwner) == users.end())
@@ -121,6 +104,142 @@ bool ServerStore::hasAccess(string username, string fileOwner, string filename)
         return false;
     return users[username].hasAccess(file);
 
+}
+
+int ServerStore::registerUser(string username, string hash)
+{
+    //ustawiamy nazwe pliku jako nazwa_uzytkownika.txt w folderze loginData
+    string filename = "admin/loginData/" + username + ".txt";
+
+    //sprawdzenie czy nie ma juz uzytkownika o takiej nazwie
+    if(loginFileExists(filename))
+    {
+        return -1;
+    }
+
+    if(userExists(username)){
+        return -1;
+    }
+
+    const char* nameOfFile = filename.c_str();
+
+    ofstream file;
+    file.open(nameOfFile);
+    file << username << endl << hash;
+    file.close();
+
+    User user;
+    user.setUsername(username);
+    user.setPasswordHash(hash);
+    users.insert(make_pair(username, user));
+    return 0;
+    // jesli username nie ma w bazie (można rejestrować)
+}
+
+int ServerStore::unregisterUser(string username, string hash)
+{
+    //ustawiamy nazwe pliku jako nazwa_uzytkownika.txt w folderze loginData
+    string filename = "admin/loginData/" + username + ".txt";
+    const char* nameOfFile = filename.c_str();
+    string fileUsername, filePasshash;
+
+    //sprawdzenie czy taki plik w ogole istnieje
+    if(!loginFileExists(filename))
+    {
+        return -1;
+    }
+
+    ifstream read(nameOfFile);
+    getline(read, fileUsername);
+    getline(read, filePasshash);
+
+    if(fileUsername == username)
+    {
+        if(filePasshash == hash)
+        {
+            //usuwanie pliku z danymi o logowaniu
+
+            vector<string> filenames = list(username);
+            for(unsigned int i=0; i<filenames.size(); ++i)
+            {
+                std::remove(filenames[i].c_str());
+            }
+            users[username].deleteFiles();
+            std::remove(nameOfFile);
+            /*
+            wstawić usuwanie jesgo katalogu
+            */
+            users.erase(username);
+            return 0;
+
+        }
+        else
+        {
+            return -2;
+        }
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+int ServerStore::loginUser(string username, string hash)
+{
+    //ustawiamy nazwe pliku jako nazwa_uzytkownika.txt w folderze loginData
+    string filename = "admin/loginData/" + username + ".txt";
+    const char* nameOfFile = filename.c_str();
+    string fileUsername, filePasshash;
+
+    //sprawdzenie czy taki plik w ogole istnieje
+    if(!loginFileExists(filename))
+    {
+        return -1;
+    }
+
+    ifstream read(nameOfFile);
+    getline(read, fileUsername);
+    getline(read, filePasshash);
+
+    if(fileUsername == username)
+    {
+        if(filePasshash == hash)
+        {
+            //poprawna nazwa uzytkownika i haslo
+            return 0;
+        }
+        else
+        {   // niepoprawne haslo
+            return -2;
+        }
+    }
+    else
+    {   // niepoprawny login
+        return -1;
+    }
+}
+
+bool ServerStore::fileExists(string username, string filename)
+{
+    if(users.find(username) == users.end())
+        return false;
+    return users[username].fileExists(filename);
+}
+
+bool ServerStore::userExists(string username)
+{
+    return users.find(username) != users.end();
+}
+
+bool ServerStore::loginFileExists(string filename) {
+    ifstream f(filename.c_str());
+    if (f.good()) {
+        f.close();
+        return true;
+    } else {
+        f.close();
+        return false;
+    }
 }
 
 History* ServerStore::getHistory(string username)

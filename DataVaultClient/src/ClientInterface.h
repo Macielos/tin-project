@@ -27,9 +27,8 @@ class ClientInterface
     private:
         void splitCommandToWords(string commandLine);
         inline bool checkFileExist (const std::string& name);
-        unsigned int checkFilenamesCorectness();
-        bool checkRegisterCommandCorectness();
-        bool checkUnregisterCommandCorectness();
+        unsigned int checkFilenamesCorrectness();
+        bool checkCommandCorrectness();
 
         bool interpretCommand(string commandLine);
         void followTaskOnServer(Action action);

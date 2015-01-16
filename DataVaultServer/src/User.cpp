@@ -17,14 +17,30 @@ User::User(string username)
     this->username = username;
 }
 
+User::User(string username, string passwordHash)
+{
+    this->username = username;
+    this->passwordHash = passwordHash;
+}
+
 string User::getUsername()
 {
     return this->username;
 }
 
+string User::getPasswordHash()
+{
+    return this->passwordHash;
+}
+
 void User::setUsername(string username)
 {
     this->username = username;
+}
+
+void User::setPasswordHash(string passwordHash)
+{
+    this->passwordHash = passwordHash;
 }
 
 vector<string> User::getFilelist()
@@ -85,6 +101,11 @@ File* User::getFile(string filename){
         return NULL;
     }
     return &files[filename];
+}
+
+void User::deleteFiles(){
+    sharedFiles.clear();
+    files.clear();
 }
 
 int User::giveAccess(File* file)
