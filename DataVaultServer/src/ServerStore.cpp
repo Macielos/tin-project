@@ -19,6 +19,11 @@ vector<string> ServerStore::list(string username)
     return users[username].getFilelist();
 }
 
+vector<string> ServerStore::listShared(string username)
+{
+    return users[username].getSharedFilelist();
+}
+
 int ServerStore::add(string username, string filename)
 {
     // jesli usera nie ma w bazie
@@ -217,6 +222,20 @@ int ServerStore::loginUser(string username, string hash)
     {   // niepoprawny login
         return -1;
     }
+}
+
+string ServerStore::getSessionId(string username)
+{
+    if(users.find(username) == users.end())
+        return "";
+    return users[username].getSessionId();
+}
+
+void ServerStore::setSessionId(string username, string sessionId)
+{
+    if(users.find(username) == users.end())
+        return;
+    users[username].setSessionId(sessionId);
 }
 
 bool ServerStore::fileExists(string username, string filename)

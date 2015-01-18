@@ -16,6 +16,7 @@ enum Status
     OK,
     WRONG_SYNTAX,
     NOT_IMPLEMENTED,
+    NOT_LOGGED_IN,
     // LOGIN | UNREGISTER
     INCORRECT_LOGIN,
     INCORRECT_PASSWORD,
@@ -38,6 +39,7 @@ enum Status
 
 class Response
 {
+    protected:
         Status status;
         string description;
         vector<string> parameters;

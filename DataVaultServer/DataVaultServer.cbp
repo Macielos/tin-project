@@ -18,6 +18,7 @@
 					<Add directory="DataVaultAPI/src/" />
 					<Add directory="DataVaultServer/src/" />
 					<Add directory="DataVaultServer/src" />
+					<Add directory="DataVaultAPI/src" />
 				</Compiler>
 				<Linker>
 					<Add option="-lboost_system -lboost_filesystem -lpthread -lboost_thread -lboost_serialization" />
@@ -36,6 +37,7 @@
 					<Add directory="DataVaultAPI/src/" />
 					<Add directory="DataVaultServer/src/" />
 					<Add directory="DataVaultServer/src" />
+					<Add directory="DataVaultAPI/src" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />

@@ -10,12 +10,13 @@ using namespace std;
 /**
  *  Działanie zlecane serwerowi przez klienta
  */
-enum Action {REGISTER, LOGIN, LOGOUT, UNREGISTER, LIST, UPLOAD, DOWNLOAD, DOWNLOAD_SHARED, REMOVE, RENAME, GIVE_ACCESS, REVOKE_ACCESS};
+enum Action {REGISTER, LOGIN, LOGOUT, UNREGISTER, LIST, LIST_SHARED, UPLOAD, DOWNLOAD, DOWNLOAD_SHARED, REMOVE, RENAME, GIVE_ACCESS, REVOKE_ACCESS};
 
 class Message
 {
     string userId;
     string source;
+    string sessionId;
     Action action;
     vector<string> parameters;
 
@@ -24,6 +25,7 @@ class Message
     {
         ar & userId;
         ar & source;
+        ar & sessionId;
         ar & action;
         ar & parameters;
     }
@@ -36,11 +38,13 @@ class Message
 
         string getUserId();
         string getSource();
+        string getSessionId();
         Action getAction();
         vector<string>& getParameters();
 
         void setUserId(string userId);
         void setSource(string source);
+        void setSessionId(string sessionId);
         void setAction(Action action);
         void setParameters(vector<string> parameters);
 

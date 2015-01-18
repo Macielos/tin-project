@@ -11,6 +11,8 @@ class User
         string username;
         string passwordHash;
 
+        string sessionId;
+
         map<string, File> files;
         vector<File*> sharedFiles;
         History history;
@@ -26,7 +28,11 @@ class User
         void setUsername(string username);
         void setPasswordHash(string passwordHash);
 
+        string getSessionId();
+        void setSessionId(string sessionId);
+
         vector<string> getFilelist();
+        vector<string> getSharedFilelist();
         int add(string filename);
         int remove(string filename);
         int rename(string oldname, string newname);

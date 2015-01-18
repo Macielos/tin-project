@@ -1,7 +1,9 @@
 #include "Server.h"
 
 Server::Server(int messagePort, int dataPort, int notificationPort):
-    fileTransferManager(ioService, dataPort, notificationPort), messagePort(messagePort), dataPort(dataPort), notificationPort(notificationPort), interrupted(false)
+    fileTransferManager(ioService, dataPort, notificationPort),
+    messagePort(messagePort), dataPort(dataPort), notificationPort(notificationPort),
+    interrupted(false), SESSION_ID_LENGTH(32)
 {
     cout<<"Serwer uruchomiony"<<endl;
 }
@@ -53,15 +55,31 @@ void Server::handleMessage(tcp::socket* socket){
 
     int result;
     string response;
+    string sessionId;
     History emptyHistory;
     vector<string> mismatchingParameters;
-
     History* history;
+
+    if(message.getAction()!=REGISTER
+       && message.getAction()!=LOGIN
+       && message.getAction()!=UNREGISTER
+       && (serverStore.getSessionId(message.getUserId())!=message.getSessionId()
+        || serverStore.getSessionId(message.getUserId())==""))
+    {
+        response = createResponse(NOT_LOGGED_IN);
+        socket->write_some(boost::asio::buffer(response), error);
+        socket->close();
+        delete socket;
+        return;
+    }
+
+    cout<<"session id = "<<serverStore.getSessionId(message.getUserId())<<endl;
 
     switch(message.getAction()){
         case REGISTER:
         {
-            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            // muszą być dwa parametry
+            if (message.getParameters().size() != 2)
             {
                 response = createResponse(WRONG_SYNTAX);
                 socket->write_some(boost::asio::buffer(response), error);
@@ -85,9 +103,10 @@ void Server::handleMessage(tcp::socket* socket){
         }
         case LOGIN:
         {
-            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            // muszą być dwa parametry
+            if (message.getParameters().size() != 2)
             {
-                response = createResponse(WRONG_SYNTAX);
+                response = createResponse(WRONG_SYNTAX, "", &emptyHistory);
                 socket->write_some(boost::asio::buffer(response), error);
             }
             else
@@ -98,16 +117,19 @@ void Server::handleMessage(tcp::socket* socket){
                 {
                     case 0: // użytkownik zalogowany poprawnie
                         history = serverStore.getHistory(message.getUserId());
-                        cout<<(history==NULL)<<endl;
-                        response = createResponse(OK, history);
-                        cout<<(history==NULL)<<endl;
+                        if(history==NULL){
+                            history = &emptyHistory;
+                        }
+                        sessionId = generateSessionId();
+                        serverStore.setSessionId(message.getUserId(), sessionId);
+                        response = createResponse(OK, sessionId, history);
                         serverStore.clearHistory(message.getUserId());
                         break;
                     case -1: // niepoprawny login
-                        response = createResponse(INCORRECT_LOGIN, &emptyHistory);
+                        response = createResponse(INCORRECT_LOGIN, "", &emptyHistory);
                         break;
                     case -2: // niepoprawne haslo
-                        response = createResponse(INCORRECT_PASSWORD, &emptyHistory);
+                        response = createResponse(INCORRECT_PASSWORD, "", &emptyHistory);
                         break;
                 }
                 socket->write_some(boost::asio::buffer(response), error);
@@ -116,13 +138,15 @@ void Server::handleMessage(tcp::socket* socket){
         }
         case LOGOUT:
         {
+            serverStore.setSessionId(message.getUserId(), "");
             response = createResponse(OK);
             socket->write_some(boost::asio::buffer(response), error);
             break;
         }
         case UNREGISTER:
         {
-            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            // muszą być dwa parametry
+            if (message.getParameters().size() != 2)
             {
                 response = createResponse(WRONG_SYNTAX);
                 socket->write_some(boost::asio::buffer(response), error);
@@ -160,6 +184,21 @@ void Server::handleMessage(tcp::socket* socket){
             response = createResponse(OK, filenames);
             socket->write_some(boost::asio::buffer(response), error);
             filenames.clear();
+            break;
+        }
+        case LIST_SHARED:
+        {
+            //jeśli podano parametry - błąd
+            if(message.getParameters().size()!=0){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+
+            vector<string> names = serverStore.listShared(message.getUserId());
+            response = createResponse(OK, names);
+            socket->write_some(boost::asio::buffer(response), error);
+            names.clear();
             break;
         }
         case UPLOAD:
@@ -447,12 +486,12 @@ string Server::createResponse(Status status, vector<string>& parameters){
     return serialize(response);
 }
 
-string Server::createResponse(Status status, History* history){
-    LoginResponse response(status);
+string Server::createResponse(Status status, string sessionId, History* history){
+    LoginResponse response(status, sessionId);
     if(history!=NULL){
         response.setHistory(history);
     }
-    cout<<"Login response: "<<response.toString()<<endl;
+    cout<<"Login response: "<<response.toString2()<<endl;
     return serialize(response);
 }
 
@@ -469,4 +508,14 @@ template<typename T> void Server::deserialize(T& t, string serializedData)
     std::istringstream archive_stream(serializedData);
     boost::archive::text_iarchive archive(archive_stream);
     archive >> t;
+}
+
+string Server::generateSessionId()
+{
+    stringstream generatorStream;
+    string signs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    for(int i=0; i<SESSION_ID_LENGTH; ++i){
+        generatorStream << signs[rand() % signs.length()];
+    }
+    return generatorStream.str();
 }
