@@ -306,3 +306,110 @@
 	<../DataVaultAPI/src/Response.h>
 	<../DataVaultAPI/src/History.h>
 
+1421626016 source:/home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Event.cpp
+	"Event.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Event.h
+	<string>
+	<boost/date_time/posix_time/posix_time.hpp>
+	<boost/serialization/string.hpp>
+
+1421626016 source:/home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/FileTransferManager.cpp
+	"FileTransferManager.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/FileTransferManager.h
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/lexical_cast.hpp>
+	<ctime>
+	<iostream>
+	<string>
+	<fstream>
+	<sstream>
+	"Constants.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Constants.h
+
+1421626016 source:/home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/History.cpp
+	"History.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/History.h
+	<vector>
+	<boost/serialization/vector.hpp>
+	"Event.h"
+
+1421626016 source:/home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/LoginResponse.cpp
+	"LoginResponse.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/LoginResponse.h
+	<../DataVaultAPI/src/Response.h>
+	<../DataVaultAPI/src/History.h>
+
+1421626016 source:/home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Message.cpp
+	"Message.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Message.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1421626016 source:/home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Response.cpp
+	"Response.h"
+
+1421626016 /home/michal/TIN/TIN10/tin-project/DataVaultAPI/src/Response.h
+	<vector>
+	<string>
+	<sstream>
+	<boost/serialization/string.hpp>
+	<boost/serialization/vector.hpp>
+
+1421626017 source:/home/michal/TIN/TIN10/tin-project/DataVaultServer/src/File.cpp
+	"File.h"
+
+1421626017 /home/michal/TIN/TIN10/tin-project/DataVaultServer/src/File.h
+	<string>
+	<map>
+
+1421626017 source:/home/michal/TIN/TIN10/tin-project/DataVaultServer/src/main.cpp
+	"Server.h"
+	<boost/lexical_cast.hpp>
+
+1421626017 /home/michal/TIN/TIN10/tin-project/DataVaultServer/src/Server.h
+	<boost/archive/text_iarchive.hpp>
+	<boost/archive/text_oarchive.hpp>
+	<boost/array.hpp>
+	<boost/asio.hpp>
+	<boost/thread.hpp>
+	<boost/bind.hpp>
+	<iostream>
+	<sstream>
+	<string>
+	<cstdio>
+	"ServerStore.h"
+	"../DataVaultAPI/src/FileTransferManager.h"
+	"../DataVaultAPI/src/Message.h"
+
+1421628927 /home/michal/TIN/TIN10/tin-project/DataVaultServer/src/ServerStore.h
+	<vector>
+	<string>
+	<map>
+	<fstream>
+	<sys/types.h>
+	<sys/stat.h>
+	<unistd.h>
+	"User.h"
+
+1421626017 /home/michal/TIN/TIN10/tin-project/DataVaultServer/src/User.h
+	<string>
+	<vector>
+	"File.h"
+	"../DataVaultAPI/src/LoginResponse.h"
+
+1421626017 source:/home/michal/TIN/TIN10/tin-project/DataVaultServer/src/Server.cpp
+	"Server.h"
+
+1421626017 source:/home/michal/TIN/TIN10/tin-project/DataVaultServer/src/User.cpp
+	"User.h"
+

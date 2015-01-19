@@ -128,6 +128,18 @@ int ServerStore::registerUser(string username, string hash)
     file << username << endl << hash;
     file.close();
 
+    //dodanie do userAccounts
+    nameOfFile = "admin/userAccounts.txt";
+    file.open(nameOfFile, ios::app);
+    file << username << endl;
+    file.close();
+
+    //stworzenie katalogu
+    string path = "admin/" + username;
+    const char* nameOfPath = path.c_str();
+
+    mkdir(nameOfPath, 0777);
+
     User user;
     user.setUsername(username);
     user.setPasswordHash(hash);
@@ -166,9 +178,30 @@ int ServerStore::unregisterUser(string username, string hash)
             }
             users[username].deleteFiles();
             std::remove(nameOfFile);
-            /*
-            wstawić usuwanie jesgo katalogu
-            */
+
+            //usuniecie katalogu
+            string path = "admin/" + username;
+            const char* nameOfPath = path.c_str();
+
+            rmdir(nameOfPath);
+
+            //usuniecie z userAccounts
+            string line;
+            ifstream file;
+            nameOfFile = "admin/userAccounts.txt";
+            file.open(nameOfFile);
+            ofstream outfile;
+            const char* nameOfOutfile = "admin/userAccountsTemp.txt";
+            file.open(nameOfOutfile);
+
+            while(getline(file,line))
+            {
+                if(line==username){}
+                else {outfile<<line<<endl;}
+            }
+            outfile.close();
+            file.close();
+
             users.erase(username);
             return 0;
 

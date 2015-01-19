@@ -2,6 +2,9 @@
 #include <string>
 #include <map>
 #include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "User.h"
 
