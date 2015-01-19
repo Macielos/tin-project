@@ -6,12 +6,23 @@ typedef map<string, User>::iterator it_type;
 
 ServerStore::ServerStore()
 {
-
+    prepareFileStructure();
 }
 
 ServerStore::~ServerStore()
 {
 
+}
+
+void ServerStore::prepareFileStructure()
+{
+    mkdir("users/", 0777);
+    mkdir("admin/", 0777);
+    mkdir("admin/loginData/", 0777);
+
+    ofstream file;
+    file.open("admin/userAccounts.txt");
+    file.close();
 }
 
 vector<string> ServerStore::list(string username)
@@ -126,11 +137,23 @@ int ServerStore::registerUser(string username, string hash)
         return -1;
     }
 
+    //stworzenie katalogu
+    string path = "users/" + username;
+    const char* nameOfPath = path.c_str();
+
+    mkdir(nameOfPath, 0777);
+
     const char* nameOfFile = filename.c_str();
 
     ofstream file;
     file.open(nameOfFile);
     file << username << endl << hash;
+    file.close();
+
+    //dodanie do userAccounts
+    nameOfFile = "admin/userAccounts.txt";
+    file.open(nameOfFile, ios::app);
+    file << username << endl;
     file.close();
 
     User user;
@@ -171,9 +194,30 @@ int ServerStore::unregisterUser(string username, string hash)
             }
             users[username].deleteFiles();
             std::remove(nameOfFile);
-            /*
-            wstawić usuwanie jesgo katalogu
-            */
+
+            //usuniecie katalogu
+            string path = "admin/" + username;
+            const char* nameOfPath = path.c_str();
+
+            rmdir(nameOfPath);
+
+            //usuniecie z userAccounts
+            string line;
+            ifstream file;
+            nameOfFile = "admin/userAccounts.txt";
+            file.open(nameOfFile);
+            ofstream outfile;
+            const char* nameOfOutfile = "admin/userAccountsTemp.txt";
+            file.open(nameOfOutfile);
+
+            while(getline(file,line))
+            {
+                if(line==username){}
+                else {outfile<<line<<endl;}
+            }
+            outfile.close();
+            file.close();
+
             users.erase(username);
             return 0;
 

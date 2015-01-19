@@ -73,8 +73,6 @@ void Server::handleMessage(tcp::socket* socket){
         return;
     }
 
-    cout<<"session id = "<<serverStore.getSessionId(message.getUserId())<<endl;
-
     switch(message.getAction()){
         case REGISTER:
         {
@@ -217,7 +215,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" przesyła plik "<<message.getParameters()[i]<<endl;
-                result = fileTransferManager.receiveFile(message.getSource(), message.getParameters()[i], i!=0);
+                result = fileTransferManager.receiveFile(message.getSource(), createFilePath(message.getUserId(), message.getParameters()[i]), i!=0);
                 if(!result){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
@@ -257,7 +255,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" pobiera plik "<<message.getParameters()[i]<<endl;
-                result = fileTransferManager.sendFile(message.getSource(), message.getParameters()[i], true);
+                result = fileTransferManager.sendFile(message.getSource(), createFilePath(message.getUserId(), message.getParameters()[i]), true);
                 if(!result){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
@@ -314,7 +312,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=1; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" pobiera plik "<<message.getParameters()[i]<<" należący do użytkownika "<<message.getParameters()[0]<<endl;
-                result = fileTransferManager.sendFile(message.getSource(), message.getParameters()[i], true);
+                result = fileTransferManager.sendFile(message.getSource(), createFilePath(message.getParameters()[0], message.getParameters()[i]), true);
                 if(!result){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
@@ -338,7 +336,7 @@ void Server::handleMessage(tcp::socket* socket){
                 serverStore.updateHistory(FILE_REMOVED, message.getUserId(), message.getParameters()[i]);
                 result = serverStore.remove(message.getUserId(), message.getParameters()[i]);
                 if(result==0){
-                    remove(message.getParameters()[i].c_str());
+                    remove(createFilePath(message.getUserId(), message.getParameters()[i]).c_str());
                 }else{
                     mismatchingParameters.push_back(message.getParameters()[i]);
                 }
@@ -365,7 +363,7 @@ void Server::handleMessage(tcp::socket* socket){
             switch(result){
             case 0:
                 serverStore.updateHistory(FILE_RENAMED, message.getUserId(), message.getParameters()[1], message.getParameters()[0]);
-                rename(message.getParameters()[0].c_str(), message.getParameters()[1].c_str());
+                rename(createFilePath(message.getUserId(), message.getParameters()[0]).c_str(), createFilePath(message.getUserId(), message.getParameters()[1]).c_str());
                 response = createResponse(OK);
                 break;
             case -2:
@@ -518,4 +516,9 @@ string Server::generateSessionId()
         generatorStream << signs[rand() % signs.length()];
     }
     return generatorStream.str();
+}
+
+string Server::createFilePath(string username, string filename)
+{
+    return "users/"+username+"/"+filename;
 }

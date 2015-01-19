@@ -338,13 +338,13 @@ void ClientInterface::followTaskOnServer(Action action)
             cout << "# BŁĄD: Jesteś juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj się.\n";
         }
         else if ( action == REGISTER && client.isLogged() )
-                {
-                    cout << "# BŁĄD: Wyloguj sie aby zarejestrowac nowego uzytkownika\n";
-                }
+        {
+            cout << "# BŁĄD: Wyloguj sie aby zarejestrowac nowego uzytkownika\n";
+        }
         else if ( action == LOGIN && client.isLogged() )
-                {
-                    cout << "# BŁĄD: Jestes juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj sie.\n";
-                }
+        {
+            cout << "# BŁĄD: Jestes juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj sie.\n";
+        }
         else
         {
             if (action == UPLOAD)

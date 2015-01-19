@@ -47,4 +47,5 @@ class Server
         template<typename T> string serialize(T& t);
         template<typename T> void deserialize(T& t, string serializedData);
         string generateSessionId();
+        string createFilePath(string username, string filename);
 };

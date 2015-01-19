@@ -195,7 +195,6 @@ Response* Client::sendMessage(Message& message)
         LoginResponse* loginResponse = new LoginResponse();
         deserialize(*loginResponse, responseBuffer.data());
         sessionId = loginResponse->getSessionId();
-        cout<<"session id = "<<sessionId<<endl;
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
         socket.close();
         return loginResponse;
