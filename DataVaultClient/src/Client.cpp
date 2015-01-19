@@ -172,7 +172,7 @@ bool Client::connect()
 
 Response* Client::sendMessage(Message& message)
 {
-    boost::array<char, 128> responseBuffer;
+    boost::array<char, 8192> responseBuffer;
     boost::system::error_code error;
 
     // otwarcie gniazda

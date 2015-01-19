@@ -36,7 +36,7 @@ void Server::listen()
  *  Wątek obsługujący pojedynczą wiadomość przesłaną do serwera.
  */
 void Server::handleMessage(tcp::socket* socket){
-    boost::array<char, 2048> messageBuffer;
+    boost::array<char, 8192> messageBuffer;
     boost::system::error_code error;
     ioService.run();
     socket->read_some(boost::asio::buffer(messageBuffer), error);
