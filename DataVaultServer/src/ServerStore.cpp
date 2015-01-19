@@ -16,9 +16,9 @@ ServerStore::~ServerStore()
 
 void ServerStore::prepareFileStructure()
 {
-    mkdir("users/", 0777);
-    mkdir("admin/", 0777);
-    mkdir("admin/loginData/", 0777);
+    mkdir("users/", 777);
+    mkdir("admin/", 777);
+    mkdir("admin/loginData/", 777);
 
     ofstream file;
     file.open("admin/userAccounts.txt");
@@ -141,7 +141,7 @@ int ServerStore::registerUser(string username, string hash)
     string path = "users/" + username;
     const char* nameOfPath = path.c_str();
 
-    mkdir(nameOfPath, 0644);
+    mkdir(nameOfPath, 777);
 
     const char* nameOfFile = filename.c_str();
 
