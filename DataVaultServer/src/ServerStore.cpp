@@ -141,7 +141,7 @@ int ServerStore::registerUser(string username, string hash)
     string path = "users/" + username;
     const char* nameOfPath = path.c_str();
 
-    mkdir(nameOfPath, 0777);
+    mkdir(nameOfPath, 0644);
 
     const char* nameOfFile = filename.c_str();
 
@@ -195,11 +195,16 @@ int ServerStore::unregisterUser(string username, string hash)
             users[username].deleteFiles();
             std::remove(nameOfFile);
 
-            //usuniecie katalogu
-            string path = "admin/" + username;
+            //usuniecie katalogów
+            string path = "users/" + username;
             const char* nameOfPath = path.c_str();
 
             rmdir(nameOfPath);
+
+            string path2 = "admin/loginData/" + username;
+            const char* nameOfPath2 = path.c_str();
+
+            rmdir(nameOfPath2);
 
             //usuniecie z userAccounts
             string line;
