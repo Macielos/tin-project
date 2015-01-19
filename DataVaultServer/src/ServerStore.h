@@ -18,8 +18,13 @@ class ServerStore
         ServerStore();
         ~ServerStore();
 
-        // zwraca users.end() jak nie ma użytkownika
+        void prepareFileStructure();
+
         vector<string> list(string username);
+        /**
+        zwraca listę w postaci plik1, właściciel pliku1, plik2, właściciel pliku2, itd.
+        */
+        vector<string> listShared(string username);
 
         /**
         zwraca 0 jak się udało
@@ -83,6 +88,10 @@ class ServerStore
         */
         int loginUser(string username, string hash);
 
+        string getSessionId(string username);
+
+        void setSessionId(string username, string sessionId);
+
         bool userExists(string username);
 
         bool fileExists(string username, string filename);
@@ -98,7 +107,5 @@ class ServerStore
         void updateHistory(EventType type, string fileOwner, string filename);
 
         void updateHistory(EventType type, string fileOwner, string oldName, string newName);
-
-
 
 };

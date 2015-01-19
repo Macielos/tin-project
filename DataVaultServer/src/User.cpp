@@ -15,12 +15,14 @@ User::~User()
 User::User(string username)
 {
     this->username = username;
+    this->sessionId = "";
 }
 
-User::User(string username, string passwordHash)
+User::User(string username, string hash)
 {
     this->username = username;
     this->passwordHash = passwordHash;
+    this->sessionId = "";
 }
 
 string User::getUsername()
@@ -43,6 +45,16 @@ void User::setPasswordHash(string passwordHash)
     this->passwordHash = passwordHash;
 }
 
+string User::getSessionId()
+{
+    return sessionId;
+}
+
+void User::setSessionId(string sessionId)
+{
+    this->sessionId = sessionId;
+}
+
 vector<string> User::getFilelist()
 {
     vector<string> fileList;
@@ -54,12 +66,23 @@ vector<string> User::getFilelist()
     return fileList;
 }
 
+vector<string> User::getSharedFilelist()
+{
+    vector<string> fileList;
+    for(vector<File*>::iterator it = sharedFiles.begin(); it != sharedFiles.end(); ++it)
+    {
+        fileList.push_back((*it)->getFilename());
+        fileList.push_back((*it)->getOwner());
+    }
+    return fileList;
+}
+
 int User::add(string filename)
 {
     // jesli nie ma takiego pliku
     if(files.find(filename) != files.end())
         return -2;
-    File file = File(filename);
+    File file = File(filename, username);
     files.insert(make_pair(filename, file));
     return 0;
 }

@@ -181,6 +181,11 @@ bool ClientInterface::interpretCommand(string commandLine)
     {
         followTaskOnServer(LIST);
     }
+    // LIST_SHARED
+    else if (c == "list_shared")
+    {
+        followTaskOnServer(LIST_SHARED);
+    }
     // UPLOAD
     else if (c == "upload")
     {
@@ -284,7 +289,7 @@ unsigned int ClientInterface::checkFilenamesCorrectness()
 }
 
 /**
- *  Sprawdza czy wpisana komenda wyrejestrowania jest ok (jej parametry są prawidłowe).
+ *  Sprawdza czy wpisana komenda wyrejesterowania jest ok (jej parametry są prawidłowe).
  */
 bool ClientInterface::checkCommandCorrectness()
 {
@@ -332,6 +337,14 @@ void ClientInterface::followTaskOnServer(Action action)
         {
             cout << "# BŁĄD: Jesteś juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj się.\n";
         }
+        else if ( action == REGISTER && client.isLogged() )
+        {
+            cout << "# BŁĄD: Wyloguj sie aby zarejestrowac nowego uzytkownika\n";
+        }
+        else if ( action == LOGIN && client.isLogged() )
+        {
+            cout << "# BŁĄD: Jestes juz zalogowany. Aby zalogowac innego uzytkownika, najpierw wyloguj sie.\n";
+        }
         else
         {
             if (action == UPLOAD)
@@ -362,6 +375,7 @@ void ClientInterface::followTaskOnServer(Action action)
                     return;
                 }
             }
+
 
             if(action == REGISTER || action == LOGIN){
                 client.setUserId(command[0]);
@@ -413,7 +427,6 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                     }else{
                         cout << "# BŁĄD: Po stronie serwera wystąpił błąd podczas logowania.\n";
                     }
-
                     break;
                 }
                 case LOGOUT:
@@ -432,6 +445,14 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                     cout<<"Twoje pliki na serwerze: "<<response->getParameters().size()<<endl;
                     for(unsigned int i=0; i<response->getParameters().size(); ++i){
                         cout<<"  "<<response->getParameters()[i]<<endl;
+                    }
+                    break;
+                }
+                case LIST_SHARED:
+                {
+                    cout<<"Pliki na serwerze udostępnione ci przez innych użytkowników: "<<(response->getParameters().size()/2)<<endl;
+                    for(unsigned int i=0; i+1<response->getParameters().size(); i+=2){
+                        cout<<"  "<<response->getParameters()[i]<<" - należy do "<<response->getParameters()[i+1]<<endl;
                     }
                     break;
                 }
@@ -501,7 +522,7 @@ void ClientInterface::processResponse(Action action, Response* response, Message
                 }
                 case REVOKE_ACCESS:
                 {
-                    cout << "Uprawnienia dostępu do plików zostały cofnięte użytkownikowi " << message.getParameters()[0] << ".n";
+                    cout << "Uprawnienia dostępu do plików zostały cofnięte użytkownikowi " << message.getParameters()[0] << ".\n";
                     break;
                 }
             }
@@ -510,6 +531,13 @@ void ClientInterface::processResponse(Action action, Response* response, Message
         case WRONG_SYNTAX:
         {
             cout << "# BŁĄD: Niepoprawne polecenie lub liczba argumentów.\n";
+            break;
+        }
+        case NOT_LOGGED_IN:
+        {
+            client.setLogged(false);
+            client.setSessionId("");
+            cout << "# BŁĄD: Nie jesteś zalogowany lub twoja sesja wygasła. Użyj polecenia login [nazwa użytkownika] [hasło]\n";
             break;
         }
         case FILE_EXISTS:
@@ -611,21 +639,23 @@ void ClientInterface::connect()
 inline void ClientInterface::showHelp()
 {
     cout << "\n\n\n\t\tDATA VAULT\n\n"
-         << "  set          - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd|portn] [wartość]\n"
-         << "  connect      - ustanawia połączenie z serwerem\n\t\t\tbez parametrów\n"
-         << "  login        - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\t\tskładnia: login [nazwa użytkownika] [hasło]\n"
-         << "  logout       - wylogowuje użytkownika z serwera\n\t\t\tbez parametrów\n"
-         << "  register     - rejestruje użytkownika na serwerze przy użyciu loginu i hasła\n\t\t\tskładnia: register [nazwa użytkownika] [hasło] [powtórz hasło]\n"
-         << "  unregister   - wyrejestrowuje użytkownika z serwera\n\t\t\tskładnia: unregister [nazwa użytkownika] [hasło]\n"
-         << "  list         - pokazuje informacje o plikach\n\t\t\tskładnia: list [parametr]\n"
-         << "  upload       - wysyła plik z dysku lokalnego na serwer\n\t\t\tskładnia: upload [nazwa pliku(ścieżka względem programu)]\n"
-         << "  download     - pobiera plik z serwera na dysk lokalny\n\t\t\tskładnia: download [nazwa pliku na serwerze]\n"
-         << "  remove       - usuwa plik z serwera\n\t\t\tskładnia: remove [nazwa pliku]\n"
-         << "  rename       - zmienia nazwę pliku na serwerze\n\t\t\tskładnia: rename [nazwa pliku (stara)] [nazwa pliku (nowa)]\n"
-         << "  give access  - przyznaje dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: give access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
-         << "  revoke access- odbiera dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: revoke access [nazwa pliku na serwerze] [nazwa użytkownika]\n"
-         << "  help         - pokazuje tę pomoc\n"
-         << "  exit/quit    - wchodzi z programu\n"
+         << "  set              - zmienia ustawienia połączenia z serwerem\n\t\t\tskładnia: set [host|portp|portd|portn] [wartość]\n"
+         << "  connect          - ustanawia połączenie z serwerem\n\t\t\tbez parametrów\n"
+         << "  login            - loguje użytkownika do serwera przy użyciu loginu i hasła\n\t\t\tskładnia: login [nazwa użytkownika] [hasło]\n"
+         << "  logout           - wylogowuje użytkownika z serwera\n\t\t\tbez parametrów\n"
+         << "  register         - rejestruje użytkownika na serwerze przy użyciu loginu i hasła\n\t\t\tskładnia: register [nazwa użytkownika] [hasło]\n"
+         << "  unregister       - wyrejestrowuje użytkownika z serwera\n\t\t\tskładnia: unregister [nazwa użytkownika] [hasło]\n"
+         << "  list             - pokazuje informacje o plikach\n\t\t\tskładnia: list\n"
+         << "  list_shared      - pokazuje informacje o plikach\n\t\t\tskładnia: list_shared\n"
+         << "  upload           - wysyła plik z dysku lokalnego na serwer\n\t\t\tskładnia: upload [nazwy plików(ścieżka względem programu) rozdzielone spacjami]\n"
+         << "  download         - pobiera plik z serwera na dysk lokalny\n\t\t\tskładnia: download [nazwy plików na serwerze rozdzielone spacjami]\n"
+         << "  download_shared  - pobiera plik z serwera na dysk lokalny\n\t\t\tskładnia: download [właściciel pliku] [nazwy plików na serwerze rozdzielone spacjami]\n"
+         << "  remove           - usuwa plik z serwera\n\t\t\tskładnia: remove [nazwy plików na serwerze rozdzielone spacjami]\n"
+         << "  rename           - zmienia nazwę pliku na serwerze\n\t\t\tskładnia: rename [nazwa pliku (stara)] [nazwa pliku (nowa)]\n"
+         << "  give access      - przyznaje dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: give access [nazwa użytkownika] [nazwy plików na serwerze rozdzielone spacjami] \n"
+         << "  revoke access    - odbiera dostęp innemu użytkownikowi do danego pliku na serwerze\n\t\t\tskładnia: revoke access [nazwa użytkownika] [nazwy plików na serwerze rozdzielone spacjami]\n"
+         << "  help             - pokazuje tę pomoc\n"
+         << "  exit/quit        - wchodzi z programu\n"
          << endl;
 }
 

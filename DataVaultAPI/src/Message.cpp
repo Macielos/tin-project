@@ -26,6 +26,10 @@ string Message::getSource(){
     return source;
 }
 
+string Message::getSessionId(){
+    return sessionId;
+}
+
 Action Message::getAction(){
     return action;
 }
@@ -42,6 +46,10 @@ void Message::setSource(string source){
     this->source=source;
 }
 
+void Message::setSessionId(string sessionId){
+    this->sessionId=sessionId;
+}
+
 void Message::setAction(Action action){
     this->action=action;
 }
@@ -54,6 +62,7 @@ string Message::toString(){
     stringstream ss;
     ss << "userId = "<<userId<<endl;
     ss << "source = "<<source<<endl;
+    ss << "sessionId = "<<sessionId<<endl;
     ss << "action = "<<action<<endl;
     ss << "parameters:";
     for(unsigned int i=0; i<parameters.size(); ++i){

@@ -37,9 +37,11 @@ class Client
         string userId;
         string password;
 
-        bool validParameters;   // flaga mówiąca czy są wprowadzone poprawne parametry połączenia
-        bool connected;         // flaga mówiąca czy jest aktywne połączenie z serwerem
-        bool logged;            // flaga mówiąca czy użytkownik jest akutalnie zalogowany (czy może operować na plikach)
+        string sessionId;
+
+        bool validParameters;   // flaga mówiąca, czy są wprowadzone poprawne parametry połączenia
+        bool connected;         // flaga mówiąca, czy jest aktywne połączenie z serwerem
+        bool logged;            // flaga mówiąca, czy użytkownik jest akutalnie zalogowany (czy może operować na plikach)
 
         boost::asio::io_service ioService;
         boost::asio::ip::tcp::socket socket;
@@ -57,6 +59,7 @@ class Client
 
         void setUserId(string userId);
         void setLogged(bool logged);
+        void setSessionId(string sessionId);
 
         bool isValidParameters();
         bool isConnected();

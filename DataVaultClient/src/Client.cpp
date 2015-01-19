@@ -11,8 +11,9 @@ Client::Client(): fileTransferManager(ioService), socket(ioService)
     host = "";
     messagePort = 0;
     dataPort = 0;
-    userId = "user123";
-    password = "abc";
+    sessionId = "";
+    userId = "";
+    password = "";
 
     validParameters = false;
     connected = false;
@@ -106,9 +107,12 @@ bool Client::isLogged()
     return logged;
 }
 
-
 void Client::setLogged(bool logged){
     this->logged = logged;
+}
+
+void Client::setSessionId(string sessionId){
+    this->sessionId = sessionId;
 }
 
 /**
@@ -158,9 +162,9 @@ bool Client::connect()
         connected = true;
         return true;
     }
-    catch (boost::system::system_error err)
+    catch (boost::system::system_error error)
     {
-        cout<<"error"<<endl;
+        cerr<<"#BŁĄD: Wystąpił nieoczekiwany wyjątek podczas nawiązywania połączenia z serwerem."<<endl;
         return false;
     }
 
@@ -176,6 +180,7 @@ Response* Client::sendMessage(Message& message)
 
     message.setUserId(userId);
     message.setSource(socket.remote_endpoint().address().to_string());
+    message.setSessionId(sessionId);
 
     string serializedMessage = serialize(message);
     write(socket, boost::asio::buffer(serializedMessage), error);
@@ -189,6 +194,7 @@ Response* Client::sendMessage(Message& message)
     if(message.getAction()==LOGIN){
         LoginResponse* loginResponse = new LoginResponse();
         deserialize(*loginResponse, responseBuffer.data());
+        sessionId = loginResponse->getSessionId();
         socket.shutdown(boost::asio::ip::tcp::socket::shutdown_both, error);
         socket.close();
         return loginResponse;

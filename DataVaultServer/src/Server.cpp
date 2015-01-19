@@ -1,7 +1,9 @@
 #include "Server.h"
 
 Server::Server(int messagePort, int dataPort, int notificationPort):
-    fileTransferManager(ioService, dataPort, notificationPort), messagePort(messagePort), dataPort(dataPort), notificationPort(notificationPort), interrupted(false)
+    fileTransferManager(ioService, dataPort, notificationPort),
+    messagePort(messagePort), dataPort(dataPort), notificationPort(notificationPort),
+    interrupted(false), SESSION_ID_LENGTH(32)
 {
     cout<<"Serwer uruchomiony"<<endl;
 }
@@ -53,15 +55,29 @@ void Server::handleMessage(tcp::socket* socket){
 
     int result;
     string response;
+    string sessionId;
     History emptyHistory;
     vector<string> mismatchingParameters;
-
     History* history;
+
+    if(message.getAction()!=REGISTER
+       && message.getAction()!=LOGIN
+       && message.getAction()!=UNREGISTER
+       && (serverStore.getSessionId(message.getUserId())!=message.getSessionId()
+        || serverStore.getSessionId(message.getUserId())==""))
+    {
+        response = createResponse(NOT_LOGGED_IN);
+        socket->write_some(boost::asio::buffer(response), error);
+        socket->close();
+        delete socket;
+        return;
+    }
 
     switch(message.getAction()){
         case REGISTER:
         {
-            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            // muszą być dwa parametry
+            if (message.getParameters().size() != 2)
             {
                 response = createResponse(WRONG_SYNTAX);
                 socket->write_some(boost::asio::buffer(response), error);
@@ -85,30 +101,33 @@ void Server::handleMessage(tcp::socket* socket){
         }
         case LOGIN:
         {
-            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            // muszą być dwa parametry
+            if (message.getParameters().size() != 2)
             {
-                response = createResponse(WRONG_SYNTAX);
+                response = createResponse(WRONG_SYNTAX, "", &emptyHistory);
                 socket->write_some(boost::asio::buffer(response), error);
             }
             else
             {
                 // logowanie użyszkodnika
                 result = serverStore.loginUser(message.getParameters()[0], message.getParameters()[1]);
-
                 switch (result)
                 {
                     case 0: // użytkownik zalogowany poprawnie
                         history = serverStore.getHistory(message.getUserId());
-                        cout<<(history==NULL)<<endl;
-                        response = createResponse(OK, history);
-                        cout<<(history==NULL)<<endl;
+                        if(history==NULL){
+                            history = &emptyHistory;
+                        }
+                        sessionId = generateSessionId();
+                        serverStore.setSessionId(message.getUserId(), sessionId);
+                        response = createResponse(OK, sessionId, history);
                         serverStore.clearHistory(message.getUserId());
                         break;
                     case -1: // niepoprawny login
-                        response = createResponse(INCORRECT_LOGIN, &emptyHistory);
+                        response = createResponse(INCORRECT_LOGIN, "", &emptyHistory);
                         break;
                     case -2: // niepoprawne haslo
-                        response = createResponse(INCORRECT_PASSWORD, &emptyHistory);
+                        response = createResponse(INCORRECT_PASSWORD, "", &emptyHistory);
                         break;
                 }
                 socket->write_some(boost::asio::buffer(response), error);
@@ -117,13 +136,15 @@ void Server::handleMessage(tcp::socket* socket){
         }
         case LOGOUT:
         {
+            serverStore.setSessionId(message.getUserId(), "");
             response = createResponse(OK);
             socket->write_some(boost::asio::buffer(response), error);
             break;
         }
         case UNREGISTER:
         {
-            if (message.getParameters().size() != 2) // muszą być dwa parametry
+            // muszą być dwa parametry
+            if (message.getParameters().size() != 2)
             {
                 response = createResponse(WRONG_SYNTAX);
                 socket->write_some(boost::asio::buffer(response), error);
@@ -163,6 +184,21 @@ void Server::handleMessage(tcp::socket* socket){
             filenames.clear();
             break;
         }
+        case LIST_SHARED:
+        {
+            //jeśli podano parametry - błąd
+            if(message.getParameters().size()!=0){
+                response = createResponse(WRONG_SYNTAX);
+                socket->write_some(boost::asio::buffer(response), error);
+                break;
+            }
+
+            vector<string> names = serverStore.listShared(message.getUserId());
+            response = createResponse(OK, names);
+            socket->write_some(boost::asio::buffer(response), error);
+            names.clear();
+            break;
+        }
         case UPLOAD:
             //jeśli nie podano parametrów - błąd
             if(message.getParameters().size()==0){
@@ -179,7 +215,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" przesyła plik "<<message.getParameters()[i]<<endl;
-                result = fileTransferManager.receiveFile(message.getSource(), message.getParameters()[i], i!=0);
+                result = fileTransferManager.receiveFile(message.getSource(), createFilePath(message.getUserId(), message.getParameters()[i]), i!=0);
                 if(!result){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
@@ -219,7 +255,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=0; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" pobiera plik "<<message.getParameters()[i]<<endl;
-                result = fileTransferManager.sendFile(message.getSource(), message.getParameters()[i], true);
+                result = fileTransferManager.sendFile(message.getSource(), createFilePath(message.getUserId(), message.getParameters()[i]), true);
                 if(!result){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
@@ -276,7 +312,7 @@ void Server::handleMessage(tcp::socket* socket){
             socket->write_some(boost::asio::buffer(response), error);
             for(unsigned int i=1; i<message.getParameters().size(); ++i){
                 cout<<"Użytkownik "<<message.getUserId()<<" pobiera plik "<<message.getParameters()[i]<<" należący do użytkownika "<<message.getParameters()[0]<<endl;
-                result = fileTransferManager.sendFile(message.getSource(), message.getParameters()[i], true);
+                result = fileTransferManager.sendFile(message.getSource(), createFilePath(message.getParameters()[0], message.getParameters()[i]), true);
                 if(!result){
                     cerr<<"Nie przesłano pliku"<<endl;
                     break;
@@ -300,7 +336,7 @@ void Server::handleMessage(tcp::socket* socket){
                 serverStore.updateHistory(FILE_REMOVED, message.getUserId(), message.getParameters()[i]);
                 result = serverStore.remove(message.getUserId(), message.getParameters()[i]);
                 if(result==0){
-                    remove(message.getParameters()[i].c_str());
+                    remove(createFilePath(message.getUserId(), message.getParameters()[i]).c_str());
                 }else{
                     mismatchingParameters.push_back(message.getParameters()[i]);
                 }
@@ -327,7 +363,7 @@ void Server::handleMessage(tcp::socket* socket){
             switch(result){
             case 0:
                 serverStore.updateHistory(FILE_RENAMED, message.getUserId(), message.getParameters()[1], message.getParameters()[0]);
-                rename(message.getParameters()[0].c_str(), message.getParameters()[1].c_str());
+                rename(createFilePath(message.getUserId(), message.getParameters()[0]).c_str(), createFilePath(message.getUserId(), message.getParameters()[1]).c_str());
                 response = createResponse(OK);
                 break;
             case -2:
@@ -448,12 +484,12 @@ string Server::createResponse(Status status, vector<string>& parameters){
     return serialize(response);
 }
 
-string Server::createResponse(Status status, History* history){
-    LoginResponse response(status);
+string Server::createResponse(Status status, string sessionId, History* history){
+    LoginResponse response(status, sessionId);
     if(history!=NULL){
         response.setHistory(history);
     }
-    cout<<"Login response: "<<response.toString()<<endl;
+    cout<<"Login response: "<<response.toString2()<<endl;
     return serialize(response);
 }
 
@@ -470,4 +506,19 @@ template<typename T> void Server::deserialize(T& t, string serializedData)
     std::istringstream archive_stream(serializedData);
     boost::archive::text_iarchive archive(archive_stream);
     archive >> t;
+}
+
+string Server::generateSessionId()
+{
+    stringstream generatorStream;
+    string signs = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    for(int i=0; i<SESSION_ID_LENGTH; ++i){
+        generatorStream << signs[rand() % signs.length()];
+    }
+    return generatorStream.str();
+}
+
+string Server::createFilePath(string username, string filename)
+{
+    return "users/"+username+"/"+filename;
 }

@@ -6,7 +6,7 @@ typedef map<string, User>::iterator it_type;
 
 ServerStore::ServerStore()
 {
-
+    prepareFileStructure();
 }
 
 ServerStore::~ServerStore()
@@ -14,9 +14,25 @@ ServerStore::~ServerStore()
 
 }
 
+void ServerStore::prepareFileStructure()
+{
+    mkdir("users/", 0777);
+    mkdir("admin/", 0777);
+    mkdir("admin/loginData/", 0777);
+
+    ofstream file;
+    file.open("admin/userAccounts.txt");
+    file.close();
+}
+
 vector<string> ServerStore::list(string username)
 {
     return users[username].getFilelist();
+}
+
+vector<string> ServerStore::listShared(string username)
+{
+    return users[username].getSharedFilelist();
 }
 
 int ServerStore::add(string username, string filename)
@@ -121,6 +137,12 @@ int ServerStore::registerUser(string username, string hash)
         return -1;
     }
 
+    //stworzenie katalogu
+    string path = "users/" + username;
+    const char* nameOfPath = path.c_str();
+
+    mkdir(nameOfPath, 0777);
+
     const char* nameOfFile = filename.c_str();
 
     ofstream file;
@@ -133,12 +155,6 @@ int ServerStore::registerUser(string username, string hash)
     file.open(nameOfFile, ios::app);
     file << username << endl;
     file.close();
-
-    //stworzenie katalogu
-    string path = "admin/" + username;
-    const char* nameOfPath = path.c_str();
-
-    mkdir(nameOfPath, 0777);
 
     User user;
     user.setUsername(username);
@@ -250,6 +266,20 @@ int ServerStore::loginUser(string username, string hash)
     {   // niepoprawny login
         return -1;
     }
+}
+
+string ServerStore::getSessionId(string username)
+{
+    if(users.find(username) == users.end())
+        return "";
+    return users[username].getSessionId();
+}
+
+void ServerStore::setSessionId(string username, string sessionId)
+{
+    if(users.find(username) == users.end())
+        return;
+    users[username].setSessionId(sessionId);
 }
 
 bool ServerStore::fileExists(string username, string filename)
